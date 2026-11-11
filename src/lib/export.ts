@@ -35,12 +35,13 @@ export async function buildWorkbook(groups: { activity: Activity; people: Signup
       { header: 'Teléfono', key: 'phone', width: 16 },
       { header: 'Email', key: 'email', width: 32 },
       { header: 'Mayor de edad', key: 'adult', width: 14 },
+      { header: 'Puede llevar coche', key: 'hasCar', width: 18 },
       { header: 'Quién la ha invitado', key: 'referredBy', width: 26 },
       { header: 'Fecha de inscripción', key: 'date', width: 20 },
     ];
     ws.getRow(1).font = { bold: true };
     for (const p of people) {
-      ws.addRow({ name: p.fullName, phone: p.phone, email: p.email, adult: p.isAdult ? 'Sí' : 'No', referredBy: p.referredBy ?? '', date: stamp.format(p.createdAt) });
+      ws.addRow({ name: p.fullName, phone: p.phone, email: p.email, adult: p.isAdult ? 'Sí' : 'No', hasCar: p.hasCar === null ? '' : p.hasCar ? 'Sí' : 'No', referredBy: p.referredBy ?? '', date: stamp.format(p.createdAt) });
     }
   });
   return Buffer.from(await wb.xlsx.writeBuffer());

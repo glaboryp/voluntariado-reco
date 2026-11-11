@@ -14,7 +14,7 @@ export type Activity = {
 };
 
 export type ActivityInput = Omit<Activity, 'id' | 'hidden' | 'taken'>;
-export type ProfileInput = { fullName: string; phone: string; isAdult: boolean; referredBy: string | null };
+export type ProfileInput = { fullName: string; phone: string; isAdult: boolean; hasCar: boolean; referredBy: string | null };
 export type Parsed<T> = { ok: true; data: T } | { ok: false; errors: Record<string, string> };
 export type ActivityStatus = 'open' | 'full' | 'closed' | 'finished';
 
@@ -65,12 +65,14 @@ export function parseProfileForm(fd: FormData, requireConsent: boolean): Parsed<
   if (!phone) errors.phone = 'Escribe un teléfono válido, por ejemplo 612 345 678.';
   const adult = text(fd, 'isAdult');
   if (adult !== 'si' && adult !== 'no') errors.isAdult = 'Indica si eres mayor de edad.';
+  const car = text(fd, 'hasCar');
+  if (car !== 'si' && car !== 'no') errors.hasCar = 'Indica si puedes llevar coche.';
   const referredBy = text(fd, 'referredBy') || null;
   if (referredBy && referredBy.length > 120) errors.referredBy = 'Escríbelo en menos de 120 caracteres.';
   if (requireConsent && !fd.get('consent')) errors.consent = 'Necesitamos tu consentimiento para guardar tus datos.';
 
   if (Object.keys(errors).length) return { ok: false, errors };
-  return { ok: true, data: { fullName, phone: phone!, isAdult: adult === 'si', referredBy } };
+  return { ok: true, data: { fullName, phone: phone!, isAdult: adult === 'si', hasCar: car === 'si', referredBy } };
 }
 
 export function activityStatus(

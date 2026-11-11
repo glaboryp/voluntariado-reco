@@ -48,3 +48,4 @@ CREATE TABLE IF NOT EXISTS signups (
 );
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referred_by text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS has_car boolean;

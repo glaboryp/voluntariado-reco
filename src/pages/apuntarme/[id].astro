@@ -13,7 +13,7 @@ const id = Number(Astro.params.id);
 let activity = Number.isInteger(id) ? await getActivity(id) : null;
 let message = '';
 let errors: Record<string, string> = {};
-let values: { fullName?: string; phone?: string; isAdult?: boolean | null; referredBy?: string | null } = {};
+let values: { fullName?: string; phone?: string; isAdult?: boolean | null; hasCar?: boolean | null; referredBy?: string | null } = {};
 
 if (Astro.request.method === 'POST' && activity && !activity.hidden) {
   const fd = await Astro.request.formData().catch(() => new FormData());
@@ -25,7 +25,7 @@ if (Astro.request.method === 'POST' && activity && !activity.hidden) {
       ready = true;
     } else {
       errors = parsed.errors;
-      values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), referredBy: String(fd.get('referredBy') ?? ''), isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
+      values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), referredBy: String(fd.get('referredBy') ?? ''), hasCar: fd.get('hasCar') === 'si' ? true : fd.get('hasCar') === 'no' ? false : null, isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
     }
   }
   if (ready) {
