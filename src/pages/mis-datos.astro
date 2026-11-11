@@ -7,7 +7,7 @@ import { parseProfileForm } from '../lib/rules';
 const user = Astro.locals.user!;
 let errors: Record<string, string> = {};
 let saved = false;
-let values: { fullName?: string; phone?: string; isAdult?: boolean | null } = {};
+let values: { fullName?: string; phone?: string; isAdult?: boolean | null; referredBy?: string | null } = {};
 
 if (Astro.request.method === 'POST') {
   const fd = await Astro.request.formData().catch(() => new FormData());
@@ -17,7 +17,7 @@ if (Astro.request.method === 'POST') {
     saved = true;
   } else {
     errors = parsed.errors;
-    values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
+    values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), referredBy: String(fd.get('referredBy') ?? ''), isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
   }
 }
 const profile = await getProfile(user.id);

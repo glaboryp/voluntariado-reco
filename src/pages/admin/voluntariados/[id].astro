@@ -82,7 +82,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
     </div>
     {people.length === 0 ? <p class="soft">Todavía no se ha apuntado nadie.</p> : (
       <table class="table">
-        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Email</th><th scope="col">Mayor de edad</th><th scope="col">Inscripción</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Email</th><th scope="col">Mayor de edad</th><th scope="col">Invitada por</th><th scope="col">Inscripción</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
         <tbody>
           {people.map((p) => (
             <tr>
@@ -90,6 +90,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
               <td><a href={`tel:${p.phone}`}>{p.phone}</a></td>
               <td class="email">{p.email}</td>
               <td>{p.isAdult ? 'Sí' : 'No'}</td>
+              <td>{p.referredBy ?? '—'}</td>
               <td>{formatRange(p.createdAt, null)}</td>
               <td><button class="btn btn--quiet small-btn" data-dialog={`remove-${p.userId}`}>Quitar</button>
                 <ConfirmDialog id={`remove-${p.userId}`} title={`¿Avisamos por email a ${p.fullName} de que se le ha dado de baja?`}>

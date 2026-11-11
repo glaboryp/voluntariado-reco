@@ -19,7 +19,7 @@ test('sheetNames: duplicados, longitud, caracteres prohibidos y vacíos', () => 
 test('buildWorkbook: una hoja por voluntariado con cabeceras y datos legibles', async () => {
   const a = { id: 1, title: 'Banco', startsAt: new Date('2026-12-13T09:00Z') } as Activity;
   const person = {
-    userId: 'u', fullName: 'Ana Núñez', phone: '612345678', email: 'ana@x.es', isAdult: true,
+    userId: 'u', fullName: 'Ana Núñez', phone: '612345678', email: 'ana@x.es', isAdult: true, referredBy: 'Marta López',
     createdAt: new Date('2026-11-20T17:05:00Z'), confirmationSent: true,
   };
   const buf = await buildWorkbook([{ activity: a, people: [person] }, { activity: { ...a, id: 2 }, people: [] }]);
@@ -27,8 +27,8 @@ test('buildWorkbook: una hoja por voluntariado con cabeceras y datos legibles', 
   await wb.xlsx.load(buf);
   expect(wb.worksheets.map((w) => w.name)).toEqual(['Banco', 'Banco (2)']);
   const ws = wb.worksheets[0];
-  expect(ws.getRow(1).values).toEqual([, 'Nombre y apellidos', 'Teléfono', 'Email', 'Mayor de edad', 'Fecha de inscripción']);
-  expect(ws.getRow(2).values).toEqual([, 'Ana Núñez', '612345678', 'ana@x.es', 'Sí', '20/11/2026, 18:05']);
+  expect(ws.getRow(1).values).toEqual([, 'Nombre y apellidos', 'Teléfono', 'Email', 'Mayor de edad', 'Quién la ha invitado', 'Fecha de inscripción']);
+  expect(ws.getRow(2).values).toEqual([, 'Ana Núñez', '612345678', 'ana@x.es', 'Sí', 'Marta López', '20/11/2026, 18:05']);
 });
 
 test('buildWorkbook acepta títulos con apóstrofos', async () => {
