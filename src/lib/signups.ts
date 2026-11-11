@@ -62,3 +62,11 @@ export function listUserActivities(userId: string): Promise<Activity[]> {
 export async function markConfirmationSent(activityId: number, userId: string): Promise<void> {
   await q('UPDATE signups SET confirmation_sent = true WHERE activity_id = $1 AND user_id = $2', [activityId, userId]);
 }
+
+export async function confirmationSentFor(activityId: number, userId: string): Promise<boolean> {
+  const [row] = await q<{ sent: boolean }>(
+    'SELECT confirmation_sent AS sent FROM signups WHERE activity_id = $1 AND user_id = $2',
+    [activityId, userId],
+  );
+  return row?.sent ?? false;
+}

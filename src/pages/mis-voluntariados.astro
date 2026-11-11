@@ -3,7 +3,7 @@ import ActivityCard from '../components/ActivityCard.astro';
 import ConfirmDialog from '../components/ConfirmDialog.astro';
 import Base from '../layouts/Base.astro';
 import { activityStatus } from '../lib/rules';
-import { listUserActivities, removeSignup } from '../lib/signups';
+import { confirmationSentFor, listUserActivities, removeSignup } from '../lib/signups';
 
 const user = Astro.locals.user!;
 if (Astro.request.method === 'POST') {
@@ -15,6 +15,7 @@ const now = new Date();
 const mine = await listUserActivities(user.id);
 const okId = Number(Astro.url.searchParams.get('ok'));
 const okActivity = mine.find((a) => a.id === okId);
+const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id) : false;
 ---
 <Base title="Mis voluntariados · Recoletos">
   <div class="wrap page">
@@ -22,7 +23,7 @@ const okActivity = mine.find((a) => a.id === okId);
       <h1>Mis voluntariados</h1>
       <a href="/mis-datos" class="btn btn--quiet">Mis datos</a>
     </header>
-    {okActivity && <p class="notice" role="status">Te has apuntado a {okActivity.title}. Te hemos enviado un email con los detalles.</p>}
+    {okActivity && <p class="notice" role="status">Te has apuntado a {okActivity.title}. {emailSent ? 'Te hemos enviado un email con los detalles.' : 'Aquí tienes siempre tus voluntariados.'}</p>}
     {Astro.url.searchParams.has('baja') && <p class="notice" role="status">Hecho, hemos liberado tu plaza. ¡Gracias por avisar!</p>}
     {mine.length === 0 ? (
       <div class="empty">

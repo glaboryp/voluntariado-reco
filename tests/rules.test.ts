@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  activityStatus, changedFields, needsChangePrompt, normalizePhone, parseActivityForm, parseProfileForm,
+  activityFormValues, activityStatus, changedFields, needsChangePrompt, normalizePhone, parseActivityForm, parseProfileForm,
   type ActivityInput,
 } from '../src/lib/rules';
 
@@ -114,5 +114,18 @@ describe('needsChangePrompt', () => {
   test('changedFields lista los campos cambiados', () => {
     expect(changedFields(before, { ...before, location: 'M', endsAt: new Date('2026-12-13T12:00Z') })).toEqual(['endsAt', 'location']);
     expect(changedFields(before, { ...before, startsAt: new Date(before.startsAt) })).toEqual([]);
+  });
+});
+
+describe('activityFormValues', () => {
+  const a = {
+    id: 1, title: 'T', description: 'd', location: 'L', capacity: 5, hidden: false, taken: 0,
+    startsAt: new Date('2026-12-13T09:00Z'), endsAt: null, signupClosesAt: new Date('2026-12-13T09:00Z'),
+  };
+  test('cierre igual al inicio ⇒ campo vacío, para que siga al inicio al editar', () => {
+    expect(activityFormValues(a)).toMatchObject({ startsAt: '2026-12-13T10:00', signupClosesAt: '', endsAt: '', capacity: '5' });
+  });
+  test('cierre distinto ⇒ se muestra', () => {
+    expect(activityFormValues({ ...a, signupClosesAt: new Date('2026-12-12T20:00Z') }).signupClosesAt).toBe('2026-12-12T21:00');
   });
 });

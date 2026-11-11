@@ -10,7 +10,10 @@ const stamp = new Intl.DateTimeFormat('es-ES', {
 export function sheetNames(titles: string[]): string[] {
   const used = new Set<string>();
   return titles.map((title) => {
-    const base = title.replace(/[[\]:*?/\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, MAX).trim() || 'Voluntariado';
+    // Excel also rejects names that start or end with an apostrophe, and the reserved name 'History'
+    const trimQuotes = (s: string) => s.replace(/^'+|'+$/g, '').trim();
+    let base = trimQuotes(trimQuotes(title.replace(/[[\]:*?/\\]/g, '').replace(/\s+/g, ' ')).slice(0, MAX)) || 'Voluntariado';
+    if (base.toLowerCase() === 'history') base = 'History (voluntariado)';
     let name = base;
     // Excel compares sheet names case-insensitively
     for (let n = 2; used.has(name.toLowerCase()); n++) {

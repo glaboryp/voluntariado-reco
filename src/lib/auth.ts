@@ -48,7 +48,10 @@ export function guard(pathname: string, user: SessionUser | null): 'allow' | 'lo
 }
 
 export function safeNext(next: string | null | undefined): string {
-  return next && /^\/(?![/\\])/.test(next) ? next : '/';
+  if (!next?.startsWith('/')) return '/';
+  // URL parsing strips tabs/newlines and treats backslashes like browsers do, so '/\t/evil.com' resolves off-site
+  const u = new URL(next, 'http://local.invalid');
+  return u.origin === 'http://local.invalid' ? u.pathname + u.search : '/';
 }
 
 const redirectUri = () => `${process.env.SITE_URL}/login/google/callback`;

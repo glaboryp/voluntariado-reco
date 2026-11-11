@@ -1,4 +1,4 @@
-import { madridLocalToDate } from './time';
+import { dateToMadridLocal, madridLocalToDate } from './time';
 
 export type Activity = {
   id: number;
@@ -94,4 +94,15 @@ export function changedFields(before: ActivityInput, after: ActivityInput): Watc
 
 export function needsChangePrompt(before: ActivityInput, after: ActivityInput, signupCount: number): boolean {
   return signupCount > 0 && changedFields(before, after).length > 0;
+}
+
+export function activityFormValues(a: Activity): Record<string, string> {
+  const closesAtStart = a.signupClosesAt.getTime() === a.startsAt.getTime();
+  return {
+    title: a.title, description: a.description, location: a.location, capacity: String(a.capacity),
+    startsAt: dateToMadridLocal(a.startsAt),
+    endsAt: a.endsAt ? dateToMadridLocal(a.endsAt) : '',
+    // left empty so a postponed start moves the close with it
+    signupClosesAt: closesAtStart ? '' : dateToMadridLocal(a.signupClosesAt),
+  };
 }

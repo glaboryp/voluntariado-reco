@@ -5,7 +5,7 @@ import {
 import { addAdmin, isAdmin, listAdmins, removeAdmin } from '../src/lib/admins';
 import { getProfile } from '../src/lib/profiles';
 import { purgeVolunteerData } from '../src/lib/purge';
-import { listSignups, listUserActivities, markConfirmationSent, removeSignup, signUp } from '../src/lib/signups';
+import { confirmationSentFor, listSignups, listUserActivities, markConfirmationSent, removeSignup, signUp } from '../src/lib/signups';
 import { upsertUserFromGoogle } from '../src/lib/users';
 import { q } from '../src/lib/db';
 import { activityInput, mkActivity, mkUser } from './helpers';
@@ -156,4 +156,14 @@ describe('purga', () => {
     expect(await listAdmins()).toEqual(['user2@x.es']);
     expect((await getActivity(a))!.taken).toBe(0);
   });
+});
+
+test('confirmationSentFor dice si salió el email de confirmación', async () => {
+  const a = await mkActivity();
+  const u = await mkUser(1);
+  await signUp(a, u);
+  expect(await confirmationSentFor(a, u)).toBe(false);
+  await markConfirmationSent(a, u);
+  expect(await confirmationSentFor(a, u)).toBe(true);
+  expect(await confirmationSentFor(999, u)).toBe(false);
 });

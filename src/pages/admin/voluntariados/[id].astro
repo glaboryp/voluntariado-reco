@@ -4,9 +4,9 @@ import AdminShell from '../../../components/AdminShell.astro';
 import ConfirmDialog from '../../../components/ConfirmDialog.astro';
 import { getActivity, setHidden } from '../../../lib/activities';
 import { adminRemoveSignup, removeActivity, saveActivity } from '../../../lib/admin-flow';
-import { parseActivityForm } from '../../../lib/rules';
+import { activityFormValues, parseActivityForm } from '../../../lib/rules';
 import { listSignups } from '../../../lib/signups';
-import { dateToMadridLocal, formatRange } from '../../../lib/time';
+import { formatRange } from '../../../lib/time';
 
 const id = Number(Astro.params.id);
 const activity = Number.isInteger(id) ? await getActivity(id) : null;
@@ -16,11 +16,7 @@ const here = `/admin/voluntariados/${id}`;
 const withFailures = (url: string, failed: string[]) => (failed.length ? `${url}&fallos=${encodeURIComponent(failed.join(', '))}` : url);
 const NOTIFY_ERRORS = { capacity_below_taken: `No puedes poner menos plazas que personas apuntadas (${activity.taken}).`, not_found: 'Este voluntariado ya no existe.' };
 
-let values: Record<string, string> = {
-  title: activity.title, description: activity.description, location: activity.location,
-  startsAt: dateToMadridLocal(activity.startsAt), endsAt: activity.endsAt ? dateToMadridLocal(activity.endsAt) : '',
-  signupClosesAt: dateToMadridLocal(activity.signupClosesAt), capacity: String(activity.capacity),
-};
+let values = activityFormValues(activity);
 let errors: Record<string, string> = {};
 let promptCount = 0;
 

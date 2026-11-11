@@ -11,6 +11,9 @@ test('sheetNames: duplicados, longitud, caracteres prohibidos y vacíos', () => 
   expect(sheetNames(['¿Qué? [turno] 1/2'])[0]).toBe('¿Qué turno 12');
   expect(sheetNames(['***'])[0]).toBe('Voluntariado');
   expect(new Set(sheetNames(['banco', 'BANCO'])).size).toBe(2);
+  expect(sheetNames(["'Sonrisas' de Navidad", "Recogida 'Banco'"])).toEqual(["Sonrisas' de Navidad", "Recogida 'Banco"]);
+  expect(sheetNames(['History'])[0]).not.toMatch(/^history$/i);
+  expect(sheetNames(["a".repeat(30) + "'b"])[0].endsWith("'")).toBe(false);
 });
 
 test('buildWorkbook: una hoja por voluntariado con cabeceras y datos legibles', async () => {
@@ -26,4 +29,9 @@ test('buildWorkbook: una hoja por voluntariado con cabeceras y datos legibles', 
   const ws = wb.worksheets[0];
   expect(ws.getRow(1).values).toEqual([, 'Nombre y apellidos', 'Teléfono', 'Email', 'Mayor de edad', 'Fecha de inscripción']);
   expect(ws.getRow(2).values).toEqual([, 'Ana Núñez', '612345678', 'ana@x.es', 'Sí', '20/11/2026, 18:05']);
+});
+
+test('buildWorkbook acepta títulos con apóstrofos', async () => {
+  const a = { id: 1, title: "'Sonrisas' de Navidad", startsAt: new Date() } as Activity;
+  await expect(buildWorkbook([{ activity: a, people: [] }])).resolves.toBeInstanceOf(Buffer);
 });

@@ -76,4 +76,7 @@ test('safeNext solo acepta rutas internas', () => {
   expect(safeNext('https://evil.com')).toBe('/');
   expect(safeNext('/\\evil.com')).toBe('/');
   expect(safeNext(null)).toBe('/');
+  expect(safeNext('/\t/evil.com')).toBe('/');
+  expect(safeNext('/%09/evil.com')).toBe('/%09/evil.com');
+  expect(safeNext('/mis-voluntariados?ok=3')).toBe('/mis-voluntariados?ok=3');
 });
