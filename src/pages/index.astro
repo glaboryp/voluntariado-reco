@@ -1,16 +1,37 @@
 ---
----
+import ActivityCard from '../components/ActivityCard.astro';
+import Hero from '../components/Hero.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Base from '../layouts/Base.astro';
+import { listPublicActivities } from '../lib/activities';
+import { activityStatus } from '../lib/rules';
+import { listUserActivities } from '../lib/signups';
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+const user = Astro.locals.user;
+const now = new Date();
+const [activities, mine] = await Promise.all([
+  listPublicActivities(now),
+  user ? listUserActivities(user.id) : Promise.resolve([]),
+]);
+const joined = new Set(mine.map((a) => a.id));
+const action = user?.hasProfile ? 'post' : 'link';
+---
+<Base title="Voluntariados de Navidad · Recoletos">
+  <Hero />
+  <section id="voluntariados" class="wrap list" aria-labelledby="list-title">
+    <h2 id="list-title">Voluntariados</h2>
+    {activities.length === 0 ? (
+      <p class="empty">Muy pronto publicaremos los voluntariados de esta Navidad. Vuelve a mirar en unos días.</p>
+    ) : (
+      activities.map((a) => (
+        <ActivityCard activity={a} status={activityStatus(a, now)} action={action} joined={joined.has(a.id)} />
+      ))
+    )}
+  </section>
+  <SiteFooter slot="footer" />
+</Base>
+<style>
+  .list { padding-top: clamp(1rem, 3vw, 3rem); scroll-margin-top: 1rem; }
+  .list > h2 { font-size: var(--step-head); margin-bottom: 0.5rem; }
+  .empty { font-size: var(--step-lead); max-width: 34ch; padding-block: 2rem; }
+</style>

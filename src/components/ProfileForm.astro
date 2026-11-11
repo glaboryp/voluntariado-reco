@@ -1,0 +1,50 @@
+---
+import { CONSENT_TEXT } from '../lib/signup-flow';
+
+type Values = { fullName?: string; phone?: string; isAdult?: boolean | null };
+const { values = {}, errors = {}, email, requireConsent, submitLabel } = Astro.props as {
+  values?: Values;
+  errors?: Record<string, string>;
+  email: string;
+  requireConsent: boolean;
+  submitLabel: string;
+};
+const err = (k: string) => (errors[k] ? { 'aria-invalid': 'true', 'aria-describedby': `${k}-error` } : {});
+---
+<form method="post" class="profile" novalidate>
+  <div class="field">
+    <label for="fullName">Nombre y apellidos</label>
+    <input id="fullName" name="fullName" autocomplete="name" required value={values.fullName ?? ''} {...err('fullName')} />
+    {errors.fullName && <p class="error" id="fullName-error">{errors.fullName}</p>}
+  </div>
+  <div class="field">
+    <label for="phone">Teléfono</label>
+    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required value={values.phone ?? ''} {...err('phone')} />
+    {errors.phone ? <p class="error" id="phone-error">{errors.phone}</p> : <p class="hint">Te llamaremos o escribiremos por WhatsApp para organizarnos.</p>}
+  </div>
+  <div class="field">
+    <span class="label-like">Email</span>
+    <p class="readonly">{email}</p>
+  </div>
+  <fieldset class="field" {...(errors.isAdult ? { 'aria-describedby': 'isAdult-error' } : {})}>
+    <legend>¿Eres mayor de edad?</legend>
+    <div class="row">
+      <label class="choice"><input type="radio" name="isAdult" value="si" checked={values.isAdult === true} /> <span>Sí</span></label>
+      <label class="choice"><input type="radio" name="isAdult" value="no" checked={values.isAdult === false} /> <span>No</span></label>
+    </div>
+    {errors.isAdult && <p class="error" id="isAdult-error">{errors.isAdult}</p>}
+  </fieldset>
+  {requireConsent && (
+    <div class="field">
+      <label class="choice"><input type="checkbox" name="consent" {...err('consent')} /> <span>{CONSENT_TEXT}</span></label>
+      {errors.consent && <p class="error" id="consent-error">{errors.consent}</p>}
+    </div>
+  )}
+  <button class="btn btn--block">{submitLabel}</button>
+</form>
+<style>
+  .profile { display: grid; gap: 1.4rem; }
+  .label-like { font-weight: 500; }
+  .readonly { padding: 0.7rem 0.85rem; background: var(--surface); overflow-wrap: anywhere; }
+  .row { display: flex; gap: 1.75rem; }
+</style>

@@ -1,0 +1,46 @@
+---
+import ProfileForm from '../components/ProfileForm.astro';
+import Base from '../layouts/Base.astro';
+import { getProfile, upsertProfile } from '../lib/profiles';
+import { parseProfileForm } from '../lib/rules';
+
+const user = Astro.locals.user!;
+let errors: Record<string, string> = {};
+let saved = false;
+let values: { fullName?: string; phone?: string; isAdult?: boolean | null } = {};
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  const parsed = parseProfileForm(fd, !user.hasProfile);
+  if (parsed.ok) {
+    await upsertProfile(user.id, parsed.data);
+    saved = true;
+  } else {
+    errors = parsed.errors;
+    values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
+  }
+}
+const profile = await getProfile(user.id);
+if (!Object.keys(errors).length && profile) values = profile;
+---
+<Base title="Mis datos · Recoletos">
+  <div class="wrap page">
+    <section class="intro">
+      <h1>Mis datos</h1>
+      <p class="lead">Los usamos solo para organizar los voluntariados de esta Navidad y los borramos al terminar la campaña.</p>
+      <a href="/mis-voluntariados">Volver a mis voluntariados</a>
+    </section>
+    <section class="form" aria-label="Formulario de datos">
+      {saved && <p class="notice" role="status">Datos guardados.</p>}
+      <ProfileForm email={user.email} requireConsent={!profile} values={values} errors={errors} submitLabel="Guardar mis datos" />
+    </section>
+  </div>
+</Base>
+<style>
+  .page { display: grid; gap: 2.5rem; padding-block: clamp(1.5rem, 4vw, 4rem); }
+  h1 { font-size: var(--step-head); }
+  .intro { display: grid; gap: 1.25rem; align-content: start; }
+  .lead { font-size: var(--step-lead); max-width: 30ch; }
+  .form { display: grid; gap: 1.25rem; max-width: 32rem; }
+  @media (min-width: 1000px) { .page { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+</style>
