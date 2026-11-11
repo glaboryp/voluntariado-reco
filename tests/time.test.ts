@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { dateToMadridLocal, formatMadrid, formatRange, madridLocalToDate } from '../src/lib/time';
+import { dateParts, dateToMadridLocal, formatMadrid, formatRange, madridLocalToDate } from '../src/lib/time';
 
 test('madridLocalToDate interpreta la hora tecleada en Madrid (invierno y verano)', () => {
   expect(madridLocalToDate('2026-12-13T10:00').toISOString()).toBe('2026-12-13T09:00:00.000Z');
@@ -26,4 +26,8 @@ test('formatRange añade la hora de fin si existe', () => {
   const start = new Date('2026-12-13T09:00:00Z');
   expect(formatRange(start, new Date('2026-12-13T13:00:00Z'))).toMatch(/10:00\s*[–-]\s*14:00/);
   expect(formatRange(start, null)).toBe(formatMadrid(start));
+});
+
+test('dateParts da día de la semana, número y mes cortos en Madrid', () => {
+  expect(dateParts(new Date('2026-12-13T23:30:00Z'))).toEqual({ weekday: 'lun', day: '14', month: 'dic' });
 });

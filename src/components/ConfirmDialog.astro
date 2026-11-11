@@ -1,0 +1,22 @@
+---
+const { id, title, open = false } = Astro.props as { id: string; title: string; open?: boolean };
+---
+<dialog id={id} class="dialog" aria-labelledby={`${id}-title`} data-open={open ? '' : undefined}>
+  <h2 id={`${id}-title`}>{title}</h2>
+  <div class="content"><slot /></div>
+  <div class="actions"><slot name="actions" /></div>
+</dialog>
+<style>
+  .dialog {
+    width: min(34rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); padding: 1.75rem;
+    border: 0; border-radius: var(--radius); background: var(--ground); color: var(--ink);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.28);
+  }
+  .dialog::backdrop { background: rgb(8 30 32 / 0.55); }
+  .dialog[open] { animation: rise 260ms var(--ease-out); }
+  h2 { font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.4rem); line-height: 1.05; }
+  .content { margin-top: 1rem; display: grid; gap: 0.75rem; }
+  .actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .actions :global(form) { margin: 0; }
+  @media (max-width: 480px) { .actions { flex-direction: column; } .actions :global(.btn) { width: 100%; } }
+</style>

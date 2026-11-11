@@ -1,0 +1,69 @@
+---
+import Logo from '../components/Logo.astro';
+import '../styles/global.css';
+
+const { title, description = 'Apúntate a los voluntariados de Navidad de Recoletos.' } = Astro.props as {
+  title: string;
+  description?: string;
+};
+const user = Astro.locals.user;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b7a85" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link href="https://api.fontshare.com/v2/css?f[]=gambarino@400&display=swap" rel="stylesheet" />
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="bar wrap">
+      <Logo />
+      <nav aria-label="Principal">
+        {user ? (
+          <>
+            {user.isAdmin && <a href="/admin">Panel</a>}
+            <a href="/mis-voluntariados">Mis voluntariados</a>
+            <form method="post" action="/logout"><button class="linkish">Salir</button></form>
+          </>
+        ) : (
+          <a href="/login/google?next=/mis-voluntariados">Entrar</a>
+        )}
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <slot name="footer" />
+    <script>
+      document.documentElement.classList.add('js');
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      }, { rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+      for (const d of document.querySelectorAll<HTMLDialogElement>('dialog[data-open]')) d.showModal();
+      document.addEventListener('click', (e) => {
+        const t = (e.target as HTMLElement).closest<HTMLElement>('[data-dialog], [data-close]');
+        if (!t) return;
+        if (t.dataset.dialog) (document.getElementById(t.dataset.dialog) as HTMLDialogElement | null)?.showModal();
+        else t.closest('dialog')?.close();
+      });
+    </script>
+  </body>
+</html>
+<style>
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
+  nav { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: flex-end; }
+  nav a, .linkish {
+    font: 500 1rem / 1 var(--font-text); color: var(--ink); text-decoration: none;
+    background: none; border: 0; padding: 0.75rem 0; cursor: pointer;
+  }
+  nav a:hover, .linkish:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.25em; }
+  nav form { margin: 0; }
+</style>

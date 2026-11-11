@@ -42,3 +42,10 @@ export function formatRange(start: Date, end: Date | null): string {
   if (dayFmt.format(start) === dayFmt.format(end)) return `${formatMadrid(start)}–${formatTime(end)}`;
   return `${formatMadrid(start)} – ${formatMadrid(end)}`;
 }
+
+const partsFmt = new Intl.DateTimeFormat('es-ES', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' });
+
+export function dateParts(d: Date): { weekday: string; day: string; month: string } {
+  const p = Object.fromEntries(partsFmt.formatToParts(d).map((x) => [x.type, x.value.replace('.', '')]));
+  return { weekday: p.weekday, day: p.day, month: p.month };
+}

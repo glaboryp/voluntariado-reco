@@ -1,0 +1,16 @@
+---
+const { size = 34 } = Astro.props as { size?: number };
+---
+<a href="/" class="logo" aria-label="Recoletos, voluntariados de Navidad, inicio">
+  <svg width={Math.round(size * 0.743)} height={size} viewBox="0 0 520 700" fill="none" stroke="currentColor"
+    stroke-width="56" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M248 425V522H58V58H325C400 58 460 112 460 190C460 240 445 275 418 302" />
+    <path d="M160 268L246 184L462 384V640H68" />
+  </svg>
+  <span>recoletos</span>
+</a>
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--teal); }
+  .logo span { color: var(--accent); font: 600 1.45rem / 1 var(--font-text); letter-spacing: -0.03em; }
+  @media (prefers-color-scheme: dark) { .logo span { color: var(--ink); } }
+</style>
