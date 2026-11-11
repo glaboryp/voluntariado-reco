@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+const { title, current } = Astro.props as { title: string; current: 'voluntariados' | 'admins' | 'borrar' };
+const links = [
+  { href: '/admin', label: 'Voluntariados', key: 'voluntariados' },
+  { href: '/admin/admins', label: 'Admins', key: 'admins' },
+  { href: '/admin/borrar-datos', label: 'Borrar datos', key: 'borrar' },
+];
+---
+<Base title={`${title} · Panel · Recoletos`}>
+  <div class="wrap admin">
+    <nav class="tabs" aria-label="Panel">
+      {links.map((l) => <a href={l.href} aria-current={l.key === current ? 'page' : undefined}>{l.label}</a>)}
+    </nav>
+    <slot />
+  </div>
+</Base>
+<style>
+  .admin { padding-bottom: 5rem; }
+  .tabs { display: flex; gap: 0.25rem; flex-wrap: wrap; padding-block: 0.5rem 2rem; }
+  .tabs a { padding: 0.6rem 0.9rem; text-decoration: none; font-weight: 500; color: var(--ink-soft); }
+  .tabs a:hover { color: var(--ink); background: var(--surface); }
+  .tabs a[aria-current='page'] { color: var(--ink); background: var(--surface); }
+  .admin :global(h1) { font-size: var(--step-head); }
+</style>

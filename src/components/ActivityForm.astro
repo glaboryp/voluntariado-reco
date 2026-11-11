@@ -1,0 +1,49 @@
+---
+const { values = {}, errors = {}, submitLabel } = Astro.props as {
+  values?: Record<string, string>;
+  errors?: Record<string, string>;
+  submitLabel: string;
+};
+const v = (k: string) => values[k] ?? '';
+const inv = (k: string) => (errors[k] ? { 'aria-invalid': 'true', 'aria-describedby': `${k}-error` } : {});
+const fields = [
+  { k: 'title', label: 'Título', type: 'text', req: true },
+  { k: 'location', label: 'Lugar', type: 'text', req: true },
+  { k: 'startsAt', label: 'Inicio', type: 'datetime-local', req: true },
+  { k: 'endsAt', label: 'Fin (opcional)', type: 'datetime-local', req: false },
+  { k: 'signupClosesAt', label: 'Cierre de inscripción (opcional)', type: 'datetime-local', req: false, hint: 'Si lo dejas vacío, la inscripción se cierra al empezar.' },
+  { k: 'capacity', label: 'Plazas', type: 'number', req: true },
+];
+---
+<form method="post" class="activity-form" novalidate>
+  <input type="hidden" name="intent" value="save" />
+  <input type="hidden" name="notify" value="ask" />
+  <div class="grid">
+    {fields.map((f) => (
+      <div class={`field f-${f.k}`}>
+        <label for={f.k}>{f.label}</label>
+        <input id={f.k} name={f.k} type={f.type} value={v(f.k)} required={f.req} min={f.type === 'number' ? 1 : undefined} {...inv(f.k)} />
+        {errors[f.k] ? <p class="error" id={`${f.k}-error`}>{errors[f.k]}</p> : f.hint && <p class="hint">{f.hint}</p>}
+      </div>
+    ))}
+    <div class="field f-description">
+      <label for="description">Descripción</label>
+      <textarea id="description" name="description">{v('description')}</textarea>
+    </div>
+  </div>
+  <button class="btn">{submitLabel}</button>
+</form>
+<style>
+  .activity-form { display: grid; gap: 1.5rem; justify-items: start; }
+  .grid { display: grid; gap: 1.25rem; width: 100%; }
+  @media (min-width: 760px) {
+    .grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .f-title, .f-location, .f-description { grid-column: span 6; }
+    .f-startsAt, .f-endsAt, .f-signupClosesAt { grid-column: span 2; }
+    .f-capacity { grid-column: span 2; }
+  }
+  @media (min-width: 1100px) {
+    .f-title { grid-column: span 4; }
+    .f-capacity { grid-column: span 2; }
+  }
+</style>

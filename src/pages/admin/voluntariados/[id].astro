@@ -1,0 +1,176 @@
+---
+import ActivityForm from '../../../components/ActivityForm.astro';
+import AdminShell from '../../../components/AdminShell.astro';
+import ConfirmDialog from '../../../components/ConfirmDialog.astro';
+import { getActivity, setHidden } from '../../../lib/activities';
+import { adminRemoveSignup, removeActivity, saveActivity } from '../../../lib/admin-flow';
+import { parseActivityForm } from '../../../lib/rules';
+import { listSignups } from '../../../lib/signups';
+import { dateToMadridLocal, formatRange } from '../../../lib/time';
+
+const id = Number(Astro.params.id);
+const activity = Number.isInteger(id) ? await getActivity(id) : null;
+if (!activity) return Astro.redirect('/admin');
+
+const here = `/admin/voluntariados/${id}`;
+const withFailures = (url: string, failed: string[]) => (failed.length ? `${url}&fallos=${encodeURIComponent(failed.join(', '))}` : url);
+const NOTIFY_ERRORS = { capacity_below_taken: `No puedes poner menos plazas que personas apuntadas (${activity.taken}).`, not_found: 'Este voluntariado ya no existe.' };
+
+let values: Record<string, string> = {
+  title: activity.title, description: activity.description, location: activity.location,
+  startsAt: dateToMadridLocal(activity.startsAt), endsAt: activity.endsAt ? dateToMadridLocal(activity.endsAt) : '',
+  signupClosesAt: dateToMadridLocal(activity.signupClosesAt), capacity: String(activity.capacity),
+};
+let errors: Record<string, string> = {};
+let promptCount = 0;
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  const intent = String(fd.get('intent'));
+  const notify = fd.get('notify') === 'yes' ? 'yes' : fd.get('notify') === 'no' ? 'no' : 'ask';
+
+  if (intent === 'save') {
+    values = Object.fromEntries(['title', 'description', 'location', 'startsAt', 'endsAt', 'signupClosesAt', 'capacity'].map((k) => [k, String(fd.get(k) ?? '')]));
+    const parsed = parseActivityForm(fd);
+    if (!parsed.ok) errors = parsed.errors;
+    else {
+      const r = await saveActivity(id, parsed.data, notify);
+      if (r.kind === 'prompt') promptCount = r.count;
+      else if (r.kind === 'error') errors = { capacity: NOTIFY_ERRORS[r.reason] };
+      else return Astro.redirect(withFailures(`${here}?ok=guardado${notify === 'no' ? '&manual=1' : ''}`, r.failed));
+    }
+  } else if (intent === 'visibility') {
+    await setHidden(id, !activity.hidden);
+    return Astro.redirect(`${here}?ok=${activity.hidden ? 'visible' : 'oculto'}`);
+  } else if (intent === 'delete') {
+    const r = await removeActivity(id, notify === 'yes' ? 'yes' : 'no');
+    return Astro.redirect(withFailures('/admin?ok=eliminado', r.failed));
+  } else if (intent === 'remove') {
+    const r = await adminRemoveSignup(id, String(fd.get('userId')), notify === 'yes' ? 'yes' : 'no');
+    return Astro.redirect(withFailures(`${here}?ok=quitado`, r.failed));
+  }
+}
+
+const people = await listSignups(id);
+const q = Astro.url.searchParams;
+const okText: Record<string, string> = {
+  creado: 'Voluntariado creado.', guardado: 'Cambios guardados.', oculto: 'Voluntariado oculto: ya no aparece en la web.',
+  visible: 'Voluntariado visible en la web.', quitado: 'Persona quitada del voluntariado.',
+};
+const ok = okText[q.get('ok') ?? ''];
+const manual = q.has('manual') && people.length > 0;
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+---
+<AdminShell title={activity.title} current="voluntariados">
+  <p class="soft back"><a href="/admin">Volver a la lista</a></p>
+  <header class="head">
+    <div>
+      <h1>{activity.title}</h1>
+      <p class="sub">{formatRange(activity.startsAt, activity.endsAt)} · {activity.location}</p>
+    </div>
+    <div class="actions">
+      <form method="post"><input type="hidden" name="intent" value="visibility" />
+        <button class="btn btn--quiet">{activity.hidden ? 'Mostrar en la web' : 'Ocultar de la web'}</button></form>
+      <button class="btn btn--quiet danger-text" data-dialog="delete">Eliminar</button>
+    </div>
+  </header>
+
+  {ok && <p class="notice" role="status">{ok}{manual && ' Avisa tú a estas personas:'}</p>}
+  {q.get('fallos') && <p class="notice notice--error" role="alert">No se pudo enviar el email a: {q.get('fallos')}</p>}
+  {activity.hidden && <p class="notice notice--error">Este voluntariado está oculto y no aparece en la web.</p>}
+
+  <section class="people" aria-labelledby="people-title">
+    <div class="people-head">
+      <h2 id="people-title">Apuntados ({activity.taken} de {activity.capacity})</h2>
+      {people.length > 0 && <a class="btn btn--quiet" href={`/admin/export/${id}`}>Descargar Excel</a>}
+    </div>
+    {people.length === 0 ? <p class="soft">Todavía no se ha apuntado nadie.</p> : (
+      <table class="table">
+        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Email</th><th scope="col">Mayor de edad</th><th scope="col">Inscripción</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+        <tbody>
+          {people.map((p) => (
+            <tr>
+              <td>{p.fullName}{!p.confirmationSent && <span class="warn" title="No le llegó el email de confirmación"> ⚠ sin email de confirmación</span>}</td>
+              <td><a href={`tel:${p.phone}`}>{p.phone}</a></td>
+              <td class="email">{p.email}</td>
+              <td>{p.isAdult ? 'Sí' : 'No'}</td>
+              <td>{formatRange(p.createdAt, null)}</td>
+              <td><button class="btn btn--quiet small-btn" data-dialog={`remove-${p.userId}`}>Quitar</button>
+                <ConfirmDialog id={`remove-${p.userId}`} title={`¿Avisamos por email a ${p.fullName} de que se le ha dado de baja?`}>
+                  <p>Dejará de estar apuntado/a a {activity.title}.</p>
+                  <Fragment slot="actions">
+                    <form method="post"><input type="hidden" name="intent" value="remove" /><input type="hidden" name="userId" value={p.userId} /><input type="hidden" name="notify" value="yes" /><button class="btn">Sí, enviar email</button></form>
+                    <form method="post"><input type="hidden" name="intent" value="remove" /><input type="hidden" name="userId" value={p.userId} /><input type="hidden" name="notify" value="no" /><button class="btn btn--quiet">No, le aviso yo</button></form>
+                    <button class="btn btn--quiet" data-close>Cancelar</button>
+                  </Fragment>
+                </ConfirmDialog>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </section>
+
+  <section class="edit" aria-labelledby="edit-title">
+    <h2 id="edit-title">Editar</h2>
+    <ActivityForm values={values} errors={errors} submitLabel="Guardar cambios" />
+  </section>
+
+  {promptCount > 0 && (
+    <ConfirmDialog id="notify" open title={`¿Quieres avisar por email a ${plural(promptCount, 'la persona apuntada', `las ${promptCount} personas apuntadas`)} del cambio?`}>
+      <p>Has cambiado la fecha, la hora o el lugar. Les enviaremos un email con lo que había antes y lo que hay ahora.</p>
+      <Fragment slot="actions">
+        {(['yes', 'no'] as const).map((n) => (
+          <form method="post">
+            <input type="hidden" name="intent" value="save" /><input type="hidden" name="notify" value={n} />
+            {Object.entries(values).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+            <button class={n === 'yes' ? 'btn' : 'btn btn--quiet'}>{n === 'yes' ? 'Sí, enviar email' : 'No, les aviso yo'}</button>
+          </form>
+        ))}
+      </Fragment>
+    </ConfirmDialog>
+  )}
+
+  <ConfirmDialog id="delete" title={people.length ? `¿Avisamos por email de la cancelación a ${plural(people.length, 'la persona apuntada', `las ${people.length} personas apuntadas`)}?` : '¿Eliminar este voluntariado?'}>
+    {people.length ? (
+      <>
+        <p>Se eliminará {activity.title} y sus inscripciones. Si prefieres avisar tú, aquí tienes sus datos:</p>
+        <ul class="contacts">{people.map((p) => <li>{p.fullName} · <a href={`tel:${p.phone}`}>{p.phone}</a></li>)}</ul>
+      </>
+    ) : <p>Se eliminará {activity.title}. No hay nadie apuntado.</p>}
+    <Fragment slot="actions">
+      {people.length > 0 && (
+        <form method="post"><input type="hidden" name="intent" value="delete" /><input type="hidden" name="notify" value="yes" /><button class="btn btn--danger">Sí, enviar email y eliminar</button></form>
+      )}
+      <form method="post"><input type="hidden" name="intent" value="delete" /><input type="hidden" name="notify" value="no" />
+        <button class={people.length ? 'btn btn--quiet' : 'btn btn--danger'}>{people.length ? 'No, les aviso yo y eliminar' : 'Eliminar'}</button></form>
+      <button class="btn btn--quiet" data-close>Cancelar</button>
+    </Fragment>
+  </ConfirmDialog>
+</AdminShell>
+<style>
+  .back { margin-bottom: 1rem; }
+  .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 1rem 2rem; margin-bottom: 1.5rem; }
+  .sub { margin-top: 0.6rem; font-weight: 500; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .actions form { margin: 0; }
+  .danger-text { color: var(--danger); border-color: var(--danger); }
+  .notice { margin-bottom: 1rem; }
+  h2 { font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem); }
+  .people, .edit { margin-top: 3rem; }
+  .people-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 1rem; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: 0.6rem 0.75rem 0.6rem 0; border-bottom: 2px solid var(--surface); }
+  .table td { padding: 0.7rem 0.75rem 0.7rem 0; border-bottom: 1px solid var(--surface); vertical-align: middle; }
+  .email { overflow-wrap: anywhere; }
+  .warn { display: block; color: var(--danger); font-size: var(--step-small); font-weight: 500; }
+  .small-btn { min-height: 40px; padding: 0.4rem 0.9rem; }
+  .edit h2 { margin-bottom: 1.25rem; }
+  .contacts { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; }
+  @media (max-width: 860px) {
+    .table thead { display: none; }
+    .table tr { display: grid; gap: 0.25rem; padding-block: 1rem; border-bottom: 1px solid var(--surface); }
+    .table td { border: 0; padding: 0; }
+  }
+</style>

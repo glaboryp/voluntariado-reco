@@ -1,0 +1,29 @@
+import ExcelJS from 'exceljs';
+import { expect, test } from 'vitest';
+import { buildWorkbook, sheetNames } from '../src/lib/export';
+import type { Activity } from '../src/lib/rules';
+
+test('sheetNames: duplicados, longitud, caracteres prohibidos y vacíos', () => {
+  expect(sheetNames(['Banco de Alimentos', 'Banco de Alimentos'])).toEqual(['Banco de Alimentos', 'Banco de Alimentos (2)']);
+  const long = sheetNames(['a'.repeat(40), 'a'.repeat(40)]);
+  expect(long.every((n) => n.length <= 31)).toBe(true);
+  expect(new Set(long).size).toBe(2);
+  expect(sheetNames(['¿Qué? [turno] 1/2'])[0]).toBe('¿Qué turno 12');
+  expect(sheetNames(['***'])[0]).toBe('Voluntariado');
+  expect(new Set(sheetNames(['banco', 'BANCO'])).size).toBe(2);
+});
+
+test('buildWorkbook: una hoja por voluntariado con cabeceras y datos legibles', async () => {
+  const a = { id: 1, title: 'Banco', startsAt: new Date('2026-12-13T09:00Z') } as Activity;
+  const person = {
+    userId: 'u', fullName: 'Ana Núñez', phone: '612345678', email: 'ana@x.es', isAdult: true,
+    createdAt: new Date('2026-11-20T17:05:00Z'), confirmationSent: true,
+  };
+  const buf = await buildWorkbook([{ activity: a, people: [person] }, { activity: { ...a, id: 2 }, people: [] }]);
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(buf);
+  expect(wb.worksheets.map((w) => w.name)).toEqual(['Banco', 'Banco (2)']);
+  const ws = wb.worksheets[0];
+  expect(ws.getRow(1).values).toEqual([, 'Nombre y apellidos', 'Teléfono', 'Email', 'Mayor de edad', 'Fecha de inscripción']);
+  expect(ws.getRow(2).values).toEqual([, 'Ana Núñez', '612345678', 'ana@x.es', 'Sí', '20/11/2026, 18:05']);
+});
