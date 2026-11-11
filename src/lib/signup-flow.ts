@@ -7,7 +7,7 @@ import { markConfirmationSent, signUp, type SignupResult } from './signups';
 
 // Provisional copy: edit freely
 export const SIGNUP_MESSAGES: Record<Exclude<SignupResult, 'ok'>, string> = {
-  already: 'Ya estabas apuntado/a a este voluntariado.',
+  already: 'Ya estabas apuntada a este voluntariado.',
   full: 'Vaya, se acaban de cubrir todas las plazas.',
   closed: 'La inscripción para este voluntariado ya está cerrada.',
   not_found: 'Este voluntariado ya no está disponible.',

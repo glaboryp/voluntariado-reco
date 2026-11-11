@@ -12,7 +12,7 @@ if (Astro.request.method === 'POST') {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) error = 'Escribe un email válido.';
     else { await addAdmin(email); ok = `${email.toLowerCase()} ya puede entrar al panel.`; }
   } else if (fd.get('intent') === 'remove') {
-    if ((await removeAdmin(email, me)) === 'self') error = 'No puedes quitarte a ti mismo/a.';
+    if ((await removeAdmin(email, me)) === 'self') error = 'No puedes quitarte a ti misma.';
     else ok = `${email} ya no es admin.`;
   }
 }

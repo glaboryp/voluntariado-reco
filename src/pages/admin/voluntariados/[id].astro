@@ -77,7 +77,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
   <section class="people" aria-labelledby="people-title">
     <div class="people-head">
-      <h2 id="people-title">Apuntados ({activity.taken} de {activity.capacity})</h2>
+      <h2 id="people-title">Apuntadas ({activity.taken} de {activity.capacity})</h2>
       {people.length > 0 && <a class="btn btn--quiet" href={`/admin/export/${id}`}>Descargar Excel</a>}
     </div>
     {people.length === 0 ? <p class="soft">Todavía no se ha apuntado nadie.</p> : (
@@ -93,7 +93,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
               <td>{formatRange(p.createdAt, null)}</td>
               <td><button class="btn btn--quiet small-btn" data-dialog={`remove-${p.userId}`}>Quitar</button>
                 <ConfirmDialog id={`remove-${p.userId}`} title={`¿Avisamos por email a ${p.fullName} de que se le ha dado de baja?`}>
-                  <p>Dejará de estar apuntado/a a {activity.title}.</p>
+                  <p>Dejará de estar apuntada a {activity.title}.</p>
                   <Fragment slot="actions">
                     <form method="post"><input type="hidden" name="intent" value="remove" /><input type="hidden" name="userId" value={p.userId} /><input type="hidden" name="notify" value="yes" /><button class="btn">Sí, enviar email</button></form>
                     <form method="post"><input type="hidden" name="intent" value="remove" /><input type="hidden" name="userId" value={p.userId} /><input type="hidden" name="notify" value="no" /><button class="btn btn--quiet">No, le aviso yo</button></form>
@@ -134,7 +134,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
         <p>Se eliminará {activity.title} y sus inscripciones. Si prefieres avisar tú, aquí tienes sus datos:</p>
         <ul class="contacts">{people.map((p) => <li>{p.fullName} · <a href={`tel:${p.phone}`}>{p.phone}</a></li>)}</ul>
       </>
-    ) : <p>Se eliminará {activity.title}. No hay nadie apuntado.</p>}
+    ) : <p>Se eliminará {activity.title}. No hay nadie apuntada.</p>}
     <Fragment slot="actions">
       {people.length > 0 && (
         <form method="post"><input type="hidden" name="intent" value="delete" /><input type="hidden" name="notify" value="yes" /><button class="btn btn--danger">Sí, enviar email y eliminar</button></form>

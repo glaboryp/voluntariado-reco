@@ -38,7 +38,7 @@ const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id)
             <>
               <button class="btn btn--quiet cancel" data-dialog={`cancel-${a.id}`}>Ya no puedo ir</button>
               <ConfirmDialog id={`cancel-${a.id}`} title="¿Liberar tu plaza?">
-                <p>Dejarás de estar apuntado/a a {a.title} y otra persona podrá ocupar tu plaza.</p>
+                <p>Dejarás de estar apuntada a {a.title} y otra persona podrá ocupar tu plaza.</p>
                 <Fragment slot="actions">
                   <form method="post"><input type="hidden" name="cancel" value={a.id} /><button class="btn btn--danger">Sí, ya no puedo ir</button></form>
                   <button class="btn btn--quiet" data-close>Mantener mi plaza</button>

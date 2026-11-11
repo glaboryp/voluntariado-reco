@@ -58,7 +58,7 @@ const status = available ? activityStatus(activity!, new Date()) : null;
         <section class="act" aria-label="Inscripción">
           {message && <p class="notice notice--error" role="alert">{message}</p>}
           {alreadyJoined ? (
-            <p class="notice">Ya estás apuntado/a a este voluntariado. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
+            <p class="notice">Ya estás apuntada a este voluntariado. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
           ) : status !== 'open' ? (
             !message && <p class="notice notice--error">{status === 'full' ? SIGNUP_MESSAGES.full : SIGNUP_MESSAGES.closed}</p>
           ) : profile ? (

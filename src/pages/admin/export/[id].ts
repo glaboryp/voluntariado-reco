@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ params }) => {
   if (!activities.length) return new Response('No hay voluntariados que exportar.', { status: 404 });
 
   const groups = await Promise.all(activities.map(async (activity) => ({ activity, people: await listSignups(activity.id) })));
-  const filename = all ? 'voluntarios-todos.xlsx' : `voluntariado-${slug(one!.title)}.xlsx`;
+  const filename = all ? 'voluntarias-todas.xlsx' : `voluntariado-${slug(one!.title)}.xlsx`;
   return new Response(new Uint8Array(await buildWorkbook(groups)), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

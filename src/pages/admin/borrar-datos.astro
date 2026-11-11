@@ -14,10 +14,10 @@ if (Astro.request.method === 'POST') {
 <AdminShell title="Borrar datos" current="borrar">
   <div class="grid">
     <section aria-labelledby="purge-title">
-      <h1 id="purge-title">Borrar datos de voluntarios</h1>
+      <h1 id="purge-title">Borrar datos de voluntarias</h1>
       <p class="lead">Cuando termine la campaña, borra los datos personales de todas las personas que se apuntaron.</p>
       <div class="cols">
-        <div><h2>Se borra</h2><ul><li>Todas las inscripciones</li><li>Nombre, teléfono y mayoría de edad</li><li>Las cuentas de los voluntarios</li></ul></div>
+        <div><h2>Se borra</h2><ul><li>Todas las inscripciones</li><li>Nombre, teléfono y mayoría de edad</li><li>Las cuentas de las voluntarias</li></ul></div>
         <div><h2>Se conserva</h2><ul><li>Los voluntariados</li><li>Los admins</li></ul></div>
       </div>
     </section>
@@ -34,7 +34,7 @@ if (Astro.request.method === 'POST') {
     </section>
   </div>
   <ConfirmDialog id="purge" title="¿Seguro? Esto no se puede deshacer">
-    <p>Se borrarán todas las inscripciones y los datos personales de los voluntarios.</p>
+    <p>Se borrarán todas las inscripciones y los datos personales de las voluntarias.</p>
     <Fragment slot="actions">
       <button class="btn btn--danger" type="submit" form="purge-form">Sí, borrar todo</button>
       <button class="btn btn--quiet" data-close>Cancelar</button>
