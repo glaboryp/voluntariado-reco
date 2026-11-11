@@ -1,7 +1,7 @@
 ---
 import { CONSENT_TEXT } from '../lib/signup-flow';
 
-type Values = { fullName?: string; phone?: string; isAdult?: boolean | null; referredBy?: string | null };
+type Values = { fullName?: string; phone?: string; isAdult?: boolean | null; hasCar?: boolean | null; referredBy?: string | null };
 const { values = {}, errors = {}, email, requireConsent, submitLabel } = Astro.props as {
   values?: Values;
   errors?: Record<string, string>;
@@ -33,6 +33,14 @@ const err = (k: string) => (errors[k] ? { 'aria-invalid': 'true', 'aria-describe
       <label class="choice"><input type="radio" name="isAdult" value="no" checked={values.isAdult === false} /> <span>No</span></label>
     </div>
     {errors.isAdult && <p class="error" id="isAdult-error">{errors.isAdult}</p>}
+  </fieldset>
+  <fieldset class="field" {...(errors.hasCar ? { 'aria-describedby': 'hasCar-error' } : {})}>
+    <legend>¿Tienes posibilidad de llevar coche?</legend>
+    <div class="row">
+      <label class="choice"><input type="radio" name="hasCar" value="si" checked={values.hasCar === true} /> <span>Sí</span></label>
+      <label class="choice"><input type="radio" name="hasCar" value="no" checked={values.hasCar === false} /> <span>No</span></label>
+    </div>
+    {errors.hasCar && <p class="error" id="hasCar-error">{errors.hasCar}</p>}
   </fieldset>
   <div class="field">
     <label for="referredBy">¿Quién te ha invitado?</label>

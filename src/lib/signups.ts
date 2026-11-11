@@ -10,13 +10,14 @@ export type SignupPerson = {
   phone: string;
   email: string;
   isAdult: boolean;
+  hasCar: boolean | null;
   referredBy: string | null;
   createdAt: Date;
   confirmationSent: boolean;
 };
 
 const PEOPLE_SQL = `SELECT s.user_id AS "userId", coalesce(p.full_name, '') AS "fullName", coalesce(p.phone, '') AS phone,
-    u.email, coalesce(p.is_adult, false) AS "isAdult", p.referred_by AS "referredBy", s.created_at AS "createdAt", s.confirmation_sent AS "confirmationSent"
+    u.email, coalesce(p.is_adult, false) AS "isAdult", p.has_car AS "hasCar", p.referred_by AS "referredBy", s.created_at AS "createdAt", s.confirmation_sent AS "confirmationSent"
   FROM signups s JOIN users u ON u.id = s.user_id LEFT JOIN profiles p ON p.user_id = s.user_id`;
 
 export function signUp(activityId: number, userId: string, now = new Date()): Promise<SignupResult> {

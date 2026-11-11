@@ -66,10 +66,11 @@ describe('parseActivityForm', () => {
 });
 
 describe('parseProfileForm', () => {
-  const ok = { fullName: ' Ana Núñez ', phone: '612 345 678', isAdult: 'si', consent: 'on' };
+  const ok = { fullName: ' Ana Núñez ', phone: '612 345 678', isAdult: 'si', hasCar: 'no', consent: 'on' };
   test('datos válidos', () => {
-    expect(parseProfileForm(form(ok), true)).toEqual({ ok: true, data: { fullName: 'Ana Núñez', phone: '612345678', isAdult: true, referredBy: null } });
+    expect(parseProfileForm(form(ok), true)).toEqual({ ok: true, data: { fullName: 'Ana Núñez', phone: '612345678', isAdult: true, hasCar: false, referredBy: null } });
     expect(parseProfileForm(form({ ...ok, isAdult: 'no' }), true)).toMatchObject({ ok: true, data: { isAdult: false } });
+    expect(parseProfileForm(form({ ...ok, hasCar: 'si' }), true)).toMatchObject({ ok: true, data: { hasCar: true } });
   });
   test('quién te ha invitado es opcional y se recorta', () => {
     expect(parseProfileForm(form({ ...ok, referredBy: '  Marta López ' }), true)).toMatchObject({ ok: true, data: { referredBy: 'Marta López' } });
@@ -87,7 +88,7 @@ describe('parseProfileForm', () => {
     const r = parseProfileForm(form({ fullName: ' ', phone: '123', consent: 'on' }), true);
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(Object.keys(r.errors)).toEqual(expect.arrayContaining(['fullName', 'phone', 'isAdult']));
+    expect(Object.keys(r.errors)).toEqual(expect.arrayContaining(['fullName', 'phone', 'isAdult', 'hasCar']));
   });
 });
 

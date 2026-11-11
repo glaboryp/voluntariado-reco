@@ -57,7 +57,7 @@ describe('inscripciones', () => {
     const u = await mkUser(1);
     await signUp(a, u);
     let [p] = await listSignups(a);
-    expect(p).toMatchObject({ fullName: 'Persona 1', phone: '612000001', email: 'user1@x.es', isAdult: true, referredBy: null, confirmationSent: false });
+    expect(p).toMatchObject({ fullName: 'Persona 1', phone: '612000001', email: 'user1@x.es', isAdult: true, hasCar: false, referredBy: null, confirmationSent: false });
     expect(p.createdAt).toBeInstanceOf(Date);
     await markConfirmationSent(a, u);
     [p] = await listSignups(a);
@@ -120,7 +120,7 @@ describe('usuarios y perfiles', () => {
     const u = await mkUser(1, false);
     expect(await getProfile(u)).toBeNull();
     const v = await mkUser(2);
-    expect(await getProfile(v)).toEqual({ fullName: 'Persona 2', phone: '612000002', isAdult: true, referredBy: 'Marta', email: 'user2@x.es' });
+    expect(await getProfile(v)).toEqual({ fullName: 'Persona 2', phone: '612000002', isAdult: true, hasCar: true, referredBy: 'Marta', email: 'user2@x.es' });
   });
 });
 
