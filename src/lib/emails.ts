@@ -66,7 +66,7 @@ function render(
 <tr><td><img src="${site}/email-logo.png" alt="Recoletos" width="180" style="display:block;margin-bottom:20px"></td></tr>
 <tr><td style="color:#0b7a85;font-size:22px;font-weight:700;padding-bottom:12px">${esc(copy.title)}</td></tr>
 <tr><td style="color:#12292b;font-size:15px;line-height:1.5;padding-bottom:16px">${esc(copy.intro(name))}</td></tr>
-<tr><td style="border-left:4px solid #2bb39a;padding:8px 0 8px 14px">
+<tr><td style="background:#eaf5f2;padding:14px 16px">
   <div style="font-size:17px;font-weight:700;color:#12292b;padding-bottom:6px">${esc(a.title)}</div>
   <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px">${htmlRows}</table>
 </td></tr>

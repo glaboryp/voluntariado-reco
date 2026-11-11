@@ -58,7 +58,8 @@ const user = Astro.locals.user;
   </body>
 </html>
 <style>
-  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 1rem; padding-block: 1.1rem; }
+  @media (max-width: 480px) { nav { gap: 1rem; } nav a, .linkish { font-size: 0.95rem; } }
   nav { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: flex-end; }
   nav a, .linkish {
     font: 500 1rem / 1 var(--font-text); color: var(--ink); text-decoration: none;
