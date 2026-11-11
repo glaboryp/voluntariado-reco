@@ -21,7 +21,10 @@ const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id)
   <div class="wrap page">
     <header class="head">
       <h1>Mis voluntariados</h1>
-      <a href="/mis-datos" class="btn btn--quiet">Mis datos</a>
+      <div class="head-actions">
+        <a href="/#voluntariados" class="btn">Ver voluntariados</a>
+        <a href="/mis-datos" class="btn btn--quiet">Mis datos</a>
+      </div>
     </header>
     {okActivity && <p class="notice" role="status">Te has apuntado a {okActivity.title}. {emailSent ? 'Te hemos enviado un email con los detalles.' : 'Aquí tienes siempre tus voluntariados.'}</p>}
     {Astro.url.searchParams.has('baja') && <p class="notice" role="status">Hecho, hemos liberado tu plaza. ¡Gracias por avisar!</p>}
@@ -38,7 +41,7 @@ const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id)
             <>
               <button class="btn btn--quiet cancel" data-dialog={`cancel-${a.id}`}>Ya no puedo ir</button>
               <ConfirmDialog id={`cancel-${a.id}`} title="¿Liberar tu plaza?">
-                <p>Dejarás de estar apuntado/a a {a.title} y otra persona podrá ocupar tu plaza.</p>
+                <p>Dejarás de estar apuntada a {a.title} y otra persona podrá ocupar tu plaza.</p>
                 <Fragment slot="actions">
                   <form method="post"><input type="hidden" name="cancel" value={a.id} /><button class="btn btn--danger">Sí, ya no puedo ir</button></form>
                   <button class="btn btn--quiet" data-close>Mantener mi plaza</button>
@@ -55,6 +58,7 @@ const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id)
   .page { padding-block: clamp(1.5rem, 4vw, 4rem); display: grid; gap: 1.5rem; }
   .head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
   h1 { font-size: var(--step-head); }
+  .head-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
   .empty { display: grid; gap: 1.25rem; justify-items: start; font-size: var(--step-lead); padding-block: 2rem; }
   .item { padding-bottom: 1.5rem; }
   .item + .item { padding-top: 0.5rem; }

@@ -16,7 +16,7 @@ const COPY = {
   change: {
     subject: (t: string) => `Cambios en ${t}`,
     title: 'Ha cambiado algo de tu voluntariado',
-    intro: (name: string) => `Hola ${name}, hemos tenido que cambiar algunos detalles del voluntariado al que estás apuntado/a.`,
+    intro: (name: string) => `Hola ${name}, hemos tenido que cambiar algunos detalles del voluntariado al que estás apuntada.`,
     outro: 'Si con el cambio ya no puedes venir, libera tu plaza desde la web.',
     button: 'Ver mis voluntariados',
   },
@@ -28,7 +28,7 @@ const COPY = {
     button: 'Ver voluntariados',
   },
   removed: {
-    subject: (t: string) => `Ya no estás apuntado/a a ${t}`,
+    subject: (t: string) => `Ya no estás apuntada a ${t}`,
     title: 'Te hemos dado de baja de este voluntariado',
     intro: (name: string) => `Hola ${name}, la organización te ha dado de baja de este voluntariado. Si crees que es un error, escríbenos.`,
     outro: '¡Seguro que hay otro voluntariado de Navidad que encaja contigo!',

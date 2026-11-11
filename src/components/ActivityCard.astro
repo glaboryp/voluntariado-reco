@@ -25,7 +25,7 @@ const blocked = { full: 'Completo', closed: 'Inscripción cerrada', finished: 'F
     {action !== 'none' && (
       <div class="action">
         {joined ? (
-          <p class="joined">Ya estás apuntado/a. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
+          <p class="joined">Ya estás apuntada. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
         ) : blocked ? (
           <button class="btn" disabled>{blocked}</button>
         ) : action === 'post' ? (
