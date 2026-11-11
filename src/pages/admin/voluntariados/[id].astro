@@ -67,6 +67,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
     <div class="actions">
       <form method="post"><input type="hidden" name="intent" value="visibility" />
         <button class="btn btn--quiet">{activity.hidden ? 'Mostrar en la web' : 'Ocultar de la web'}</button></form>
+      <a class="btn btn--quiet" href={`/admin/voluntariados/nuevo?desde=${id}`}>Duplicar</a>
       <button class="btn btn--quiet danger-text" data-dialog="delete">Eliminar</button>
     </div>
   </header>

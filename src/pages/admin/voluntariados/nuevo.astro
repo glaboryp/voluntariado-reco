@@ -1,10 +1,13 @@
 ---
 import ActivityForm from '../../../components/ActivityForm.astro';
 import AdminShell from '../../../components/AdminShell.astro';
-import { createActivity } from '../../../lib/activities';
-import { parseActivityForm } from '../../../lib/rules';
+import { createActivity, getActivity } from '../../../lib/activities';
+import { activityFormValues, parseActivityForm } from '../../../lib/rules';
 
-let values: Record<string, string> = { capacity: '10' };
+const sourceId = Number(Astro.url.searchParams.get('desde'));
+const source = Number.isInteger(sourceId) && sourceId > 0 && sourceId <= 2147483647 ? await getActivity(sourceId) : null;
+const heading = source ? `Duplicar «${source.title}»` : 'Nuevo voluntariado';
+let values: Record<string, string> = source ? activityFormValues(source) : { capacity: '10' };
 let errors: Record<string, string> = {};
 if (Astro.request.method === 'POST') {
   const fd = await Astro.request.formData().catch(() => new FormData());
@@ -14,9 +17,10 @@ if (Astro.request.method === 'POST') {
   values = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v)]));
 }
 ---
-<AdminShell title="Nuevo voluntariado" current="voluntariados">
-  <h1>Nuevo voluntariado</h1>
+<AdminShell title={heading} current="voluntariados">
+  <h1>{heading}</h1>
   <p class="soft back"><a href="/admin">Volver a la lista</a></p>
+  {source && <p class="notice">Revisa la fecha y lo que cambie antes de crearlo. Las personas apuntadas no se copian.</p>}
   <ActivityForm values={values} errors={errors} submitLabel="Crear voluntariado" />
 </AdminShell>
-<style>.back { margin: 0.5rem 0 2rem; }</style>
+<style>.back { margin: 0.5rem 0 2rem; } .notice { margin-bottom: 2rem; }</style>
