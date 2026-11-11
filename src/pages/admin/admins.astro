@@ -1,0 +1,64 @@
+---
+import AdminShell from '../../components/AdminShell.astro';
+import { addAdmin, listAdmins, removeAdmin } from '../../lib/admins';
+
+const me = Astro.locals.user!.email;
+let error = '';
+let ok = '';
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  const email = String(fd.get('email') ?? '').trim();
+  if (fd.get('intent') === 'add') {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) error = 'Escribe un email válido.';
+    else { await addAdmin(email); ok = `${email.toLowerCase()} ya puede entrar al panel.`; }
+  } else if (fd.get('intent') === 'remove') {
+    if ((await removeAdmin(email, me)) === 'self') error = 'No puedes quitarte a ti mismo/a.';
+    else ok = `${email} ya no es admin.`;
+  }
+}
+const admins = await listAdmins();
+---
+<AdminShell title="Admins" current="admins">
+  <div class="grid">
+    <section aria-labelledby="admins-title">
+      <h1 id="admins-title">Admins</h1>
+      <p class="lead">Estas cuentas de Google pueden entrar al panel.</p>
+      {ok && <p class="notice" role="status">{ok}</p>}
+      {error && <p class="notice notice--error" role="alert">{error}</p>}
+      <ul class="list">
+        {admins.map((email) => (
+          <li>
+            <span class="email">{email}{email === me && <span class="soft"> (tú)</span>}</span>
+            {email !== me && (
+              <form method="post"><input type="hidden" name="intent" value="remove" /><input type="hidden" name="email" value={email} />
+                <button class="btn btn--quiet">Quitar</button></form>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+    <section aria-labelledby="add-title" class="add">
+      <h2 id="add-title">Añadir admin</h2>
+      <form method="post" class="form" novalidate>
+        <input type="hidden" name="intent" value="add" />
+        <div class="field">
+          <label for="email">Email de Google</label>
+          <input id="email" name="email" type="email" autocomplete="off" required />
+        </div>
+        <button class="btn">Añadir</button>
+      </form>
+    </section>
+  </div>
+</AdminShell>
+<style>
+  .grid { display: grid; gap: 3rem; }
+  .lead { margin: 0.75rem 0 1.5rem; font-size: var(--step-lead); }
+  .list { list-style: none; margin: 1rem 0 0; padding: 0; }
+  .list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding-block: 0.6rem; border-bottom: 1px solid var(--surface); min-height: 3.5rem; }
+  .list form { margin: 0; }
+  .email { font-weight: 500; overflow-wrap: anywhere; }
+  .add h2 { font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem); margin-bottom: 1.25rem; }
+  .form { display: grid; gap: 1.25rem; justify-items: start; max-width: 28rem; }
+  .form .field { width: 100%; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1.3fr 1fr; gap: 4rem; } .add { padding-top: 0.5rem; } }
+</style>

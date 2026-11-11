@@ -1,0 +1,54 @@
+---
+import AdminShell from '../../components/AdminShell.astro';
+import ConfirmDialog from '../../components/ConfirmDialog.astro';
+import { purgeVolunteerData } from '../../lib/purge';
+
+let result: { signups: number; profiles: number } | null = null;
+let error = '';
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  if (String(fd.get('confirm') ?? '').trim() === 'BORRAR') result = await purgeVolunteerData();
+  else error = 'Para borrar, escribe BORRAR en mayúsculas.';
+}
+---
+<AdminShell title="Borrar datos" current="borrar">
+  <div class="grid">
+    <section aria-labelledby="purge-title">
+      <h1 id="purge-title">Borrar datos de voluntarios</h1>
+      <p class="lead">Cuando termine la campaña, borra los datos personales de todas las personas que se apuntaron.</p>
+      <div class="cols">
+        <div><h2>Se borra</h2><ul><li>Todas las inscripciones</li><li>Nombre, teléfono y mayoría de edad</li><li>Las cuentas de los voluntarios</li></ul></div>
+        <div><h2>Se conserva</h2><ul><li>Los voluntariados</li><li>Los admins</li></ul></div>
+      </div>
+    </section>
+    <section aria-label="Confirmar borrado" class="act">
+      {result && <p class="notice" role="status">Hecho. Se han borrado {result.signups} inscripciones y {result.profiles} perfiles.</p>}
+      {error && <p class="notice notice--error" role="alert">{error}</p>}
+      <form method="post" id="purge-form" class="form" novalidate>
+        <div class="field">
+          <label for="confirm">Escribe BORRAR para confirmar</label>
+          <input id="confirm" name="confirm" autocomplete="off" autocapitalize="characters" />
+        </div>
+        <button type="button" class="btn btn--danger" data-dialog="purge">Borrar todos los datos</button>
+      </form>
+    </section>
+  </div>
+  <ConfirmDialog id="purge" title="¿Seguro? Esto no se puede deshacer">
+    <p>Se borrarán todas las inscripciones y los datos personales de los voluntarios.</p>
+    <Fragment slot="actions">
+      <button class="btn btn--danger" type="submit" form="purge-form">Sí, borrar todo</button>
+      <button class="btn btn--quiet" data-close>Cancelar</button>
+    </Fragment>
+  </ConfirmDialog>
+</AdminShell>
+<style>
+  .grid { display: grid; gap: 3rem; }
+  .lead { margin: 0.75rem 0 2rem; font-size: var(--step-lead); max-width: 40ch; }
+  .cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+  h2 { font-size: 1.6rem; margin-bottom: 0.75rem; }
+  ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+  .act { display: grid; gap: 1.25rem; align-content: start; max-width: 28rem; }
+  .form { display: grid; gap: 1.25rem; justify-items: start; }
+  .form .field { width: 100%; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1.3fr 1fr; gap: 4rem; } .act { padding-top: 5rem; } }
+</style>
