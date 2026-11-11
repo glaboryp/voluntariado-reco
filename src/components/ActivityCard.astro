@@ -1,0 +1,58 @@
+---
+import type { Activity, ActivityStatus } from '../lib/rules';
+import { dateParts, formatRange } from '../lib/time';
+import Seats from './Seats.astro';
+
+const { activity: a, status, action, joined = false } = Astro.props as {
+  activity: Activity;
+  status: ActivityStatus;
+  action: 'post' | 'link' | 'none';
+  joined?: boolean;
+};
+const d = dateParts(a.startsAt);
+const blocked = { full: 'Completo', closed: 'Inscripción cerrada', finished: 'Finalizado', open: '' }[status];
+---
+<article class="activity" aria-labelledby={`a-${a.id}`} data-reveal>
+  <p class="date" aria-hidden="true"><strong>{d.day}</strong><span>{d.month}, {d.weekday}</span></p>
+  <div class="body">
+    <h3 id={`a-${a.id}`}>{a.title}</h3>
+    <p class="meta"><span class="visually-hidden">Cuándo: </span>{formatRange(a.startsAt, a.endsAt)}</p>
+    <p class="meta"><span class="visually-hidden">Dónde: </span>{a.location}</p>
+    {a.description && <p class="desc">{a.description}</p>}
+  </div>
+  <div class="side">
+    <Seats capacity={a.capacity} taken={a.taken} />
+    {action !== 'none' && (
+      <div class="action">
+        {joined ? (
+          <p class="joined">Ya estás apuntado/a. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
+        ) : blocked ? (
+          <button class="btn" disabled>{blocked}</button>
+        ) : action === 'post' ? (
+          <form method="post" action={`/apuntarme/${a.id}`}><button class="btn">Apuntarme</button></form>
+        ) : (
+          <a class="btn" href={`/apuntarme/${a.id}`}>Apuntarme</a>
+        )}
+      </div>
+    )}
+  </div>
+</article>
+<style>
+  .activity {
+    display: grid; grid-template-columns: 4rem minmax(0, 1fr); grid-template-areas: 'date body' '. side';
+    column-gap: 1rem; row-gap: 1.25rem; padding-block: 2.25rem 2.75rem;
+  }
+  .date { grid-area: date; display: grid; justify-items: start; align-content: start; line-height: 1; color: var(--accent); }
+  .date span { font-weight: 500; font-size: var(--step-small); }
+  .date strong { font: 400 var(--step-head) / 0.9 var(--font-display); letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+  .body { grid-area: body; }
+  .side { grid-area: side; }
+  h3 { font-size: var(--step-head); line-height: 1; margin-bottom: 0.6rem; }
+  .meta { font-weight: 500; }
+  .desc { margin-top: 0.75rem; max-width: 60ch; }
+  .action { margin-top: 1.25rem; }
+  .joined { font-weight: 500; color: var(--accent); }
+  @media (min-width: 1000px) {
+    .activity { grid-template-columns: 9rem minmax(0, 1fr) 19rem; grid-template-areas: 'date body side'; column-gap: 3rem; padding-block: 3rem; }
+  }
+</style>

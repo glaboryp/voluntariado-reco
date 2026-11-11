@@ -1,0 +1,22 @@
+---
+import ActivityForm from '../../../components/ActivityForm.astro';
+import AdminShell from '../../../components/AdminShell.astro';
+import { createActivity } from '../../../lib/activities';
+import { parseActivityForm } from '../../../lib/rules';
+
+let values: Record<string, string> = { capacity: '10' };
+let errors: Record<string, string> = {};
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  const parsed = parseActivityForm(fd);
+  if (parsed.ok) return Astro.redirect(`/admin/voluntariados/${await createActivity(parsed.data)}?ok=creado`);
+  errors = parsed.errors;
+  values = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v)]));
+}
+---
+<AdminShell title="Nuevo voluntariado" current="voluntariados">
+  <h1>Nuevo voluntariado</h1>
+  <p class="soft back"><a href="/admin">Volver a la lista</a></p>
+  <ActivityForm values={values} errors={errors} submitLabel="Crear voluntariado" />
+</AdminShell>
+<style>.back { margin: 0.5rem 0 2rem; }</style>

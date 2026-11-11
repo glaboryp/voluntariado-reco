@@ -1,0 +1,29 @@
+{
+  "name": "voluntariado-reco",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "test": "vitest run",
+    "db:up": "docker run -d --name reco-pg -e POSTGRES_PASSWORD=postgres -p 54329:5432 postgres:17",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^11.0.20",
+    "astro": "^7.4.10",
+    "exceljs": "^4.4.0",
+    "nodemailer": "^10.5.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "vitest": "^5.1.0"
+  }
+}

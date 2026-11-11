@@ -1,0 +1,59 @@
+---
+import AdminShell from '../../components/AdminShell.astro';
+import { listAllActivities } from '../../lib/activities';
+import { activityStatus } from '../../lib/rules';
+import { formatRange } from '../../lib/time';
+
+const activities = await listAllActivities();
+const now = new Date();
+const label = { open: 'Abierto', full: 'Completo', closed: 'Inscripción cerrada', finished: 'Finalizado' };
+const deleted = Astro.url.searchParams.get('ok') === 'eliminado';
+const failed = Astro.url.searchParams.get('fallos');
+---
+<AdminShell title="Voluntariados" current="voluntariados">
+  <header class="head">
+    <h1>Voluntariados</h1>
+    <div class="actions">
+      <a class="btn btn--quiet" href="/admin/export/todo">Descargar todo (Excel)</a>
+      <a class="btn" href="/admin/voluntariados/nuevo">Nuevo voluntariado</a>
+    </div>
+  </header>
+  {deleted && <p class="notice" role="status">Voluntariado eliminado.</p>}
+  {failed && <p class="notice notice--error" role="alert">No se pudo enviar el email a: {failed}</p>}
+  {activities.length === 0 ? (
+    <p class="empty">Todavía no hay voluntariados. Crea el primero con “Nuevo voluntariado”.</p>
+  ) : (
+    <table class="table">
+      <thead><tr><th scope="col">Voluntariado</th><th scope="col">Cuándo</th><th scope="col" class="num">Plazas</th><th scope="col">Estado</th></tr></thead>
+      <tbody>
+        {activities.map((a) => (
+          <tr>
+            <td><a href={`/admin/voluntariados/${a.id}`}>{a.title}</a><span class="soft small where">{a.location}</span></td>
+            <td>{formatRange(a.startsAt, a.endsAt)}</td>
+            <td class="num">{a.taken}/{a.capacity}</td>
+            <td>{label[activityStatus(a, now)]}{a.hidden && <span class="tag">Oculto</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</AdminShell>
+<style>
+  .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 1.5rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .empty { font-size: var(--step-lead); padding-block: 2rem; }
+  .table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .table th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: 0.6rem 0.75rem 0.6rem 0; border-bottom: 2px solid var(--surface); }
+  .table td { padding: 0.9rem 0.75rem 0.9rem 0; border-bottom: 1px solid var(--surface); vertical-align: top; }
+  .table a { font-weight: 600; }
+  .where { display: block; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { margin-left: 0.5rem; padding: 0.1rem 0.45rem; background: var(--surface); font-size: var(--step-small); font-weight: 500; }
+  @media (max-width: 720px) {
+    .table thead { display: none; }
+    .table tr { display: grid; gap: 0.2rem; padding-block: 1rem; border-bottom: 1px solid var(--surface); }
+    .table td { border: 0; padding: 0; }
+    .num { text-align: left; }
+    .num::after { content: ' plazas ocupadas'; }
+  }
+</style>

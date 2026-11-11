@@ -1,0 +1,94 @@
+---
+import ActivityCard from '../../components/ActivityCard.astro';
+import ProfileForm from '../../components/ProfileForm.astro';
+import Base from '../../layouts/Base.astro';
+import { getActivity } from '../../lib/activities';
+import { getProfile, upsertProfile } from '../../lib/profiles';
+import { activityStatus, parseProfileForm } from '../../lib/rules';
+import { completeSignup, SIGNUP_MESSAGES } from '../../lib/signup-flow';
+import { listUserActivities } from '../../lib/signups';
+
+const user = Astro.locals.user!;
+const id = Number(Astro.params.id);
+let activity = Number.isInteger(id) ? await getActivity(id) : null;
+let message = '';
+let errors: Record<string, string> = {};
+let values: { fullName?: string; phone?: string; isAdult?: boolean | null } = {};
+
+if (Astro.request.method === 'POST' && activity && !activity.hidden) {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  let ready = user.hasProfile;
+  if (fd.has('fullName')) {
+    const parsed = parseProfileForm(fd, !user.hasProfile);
+    if (parsed.ok) {
+      await upsertProfile(user.id, parsed.data);
+      ready = true;
+    } else {
+      errors = parsed.errors;
+      values = { fullName: String(fd.get('fullName') ?? ''), phone: String(fd.get('phone') ?? ''), isAdult: fd.get('isAdult') === 'si' ? true : fd.get('isAdult') === 'no' ? false : null };
+    }
+  }
+  if (ready) {
+    const result = await completeSignup(id, { ...user, hasProfile: true });
+    if (result === 'ok') return Astro.redirect(`/mis-voluntariados?ok=${id}`);
+    if (result !== 'already') message = SIGNUP_MESSAGES[result];
+    activity = await getActivity(id);
+  }
+}
+
+const available = activity && !activity.hidden;
+const profile = user.hasProfile ? await getProfile(user.id) : null;
+const alreadyJoined = available && (await listUserActivities(user.id)).some((a) => a.id === id);
+const status = available ? activityStatus(activity!, new Date()) : null;
+---
+<Base title={available ? `Apuntarme a ${activity!.title} · Recoletos` : 'Voluntariado no disponible · Recoletos'}>
+  <div class="wrap page">
+    {!available ? (
+      <section class="gone">
+        <h1>Este voluntariado ya no está disponible</h1>
+        <p class="lead">Puede que se haya cancelado o cambiado. Echa un vistazo a los demás.</p>
+        <a class="btn" href="/#voluntariados">Ver voluntariados</a>
+      </section>
+    ) : (
+      <>
+        <section class="summary" aria-labelledby="page-title">
+          <h1 id="page-title">{profile ? 'Confirma tu plaza' : 'Tus datos y listo'}</h1>
+          <ActivityCard activity={activity!} status={status!} action="none" />
+        </section>
+        <section class="act" aria-label="Inscripción">
+          {message && <p class="notice notice--error" role="alert">{message}</p>}
+          {alreadyJoined ? (
+            <p class="notice">Ya estás apuntado/a a este voluntariado. <a href="/mis-voluntariados">Ver mis voluntariados</a></p>
+          ) : status !== 'open' ? (
+            !message && <p class="notice notice--error">{status === 'full' ? SIGNUP_MESSAGES.full : SIGNUP_MESSAGES.closed}</p>
+          ) : profile ? (
+            <form method="post" class="confirm">
+              <p>Te apuntamos como <strong>{profile.fullName}</strong> ({profile.phone}). <a href="/mis-datos">¿Cambiar mis datos?</a></p>
+              <button class="btn btn--block">Confirmar plaza</button>
+            </form>
+          ) : (
+            <>
+              <p class="intro">Solo te lo pedimos esta vez. Para los siguientes voluntariados bastará un clic.</p>
+              <ProfileForm email={user.email} requireConsent values={values} errors={errors} submitLabel="Confirmar plaza" />
+            </>
+          )}
+        </section>
+      </>
+    )}
+  </div>
+</Base>
+<style>
+  .page { display: grid; gap: 2.5rem; padding-block: clamp(1.5rem, 4vw, 4rem); }
+  h1 { font-size: var(--step-head); }
+  .summary h1 { margin-bottom: 0.5rem; }
+  .act { display: grid; gap: 1.25rem; align-content: start; max-width: 32rem; }
+  .confirm { display: grid; gap: 1.25rem; }
+  .intro { font-weight: 500; }
+  .gone { display: grid; gap: 1.5rem; justify-items: start; padding-block: 3rem; }
+  .lead { font-size: var(--step-lead); max-width: 34ch; }
+  @media (min-width: 1000px) {
+    .page { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 4rem; }
+    .summary :global(.activity) { grid-template-columns: 7rem minmax(0, 1fr); grid-template-areas: 'date body' '. side'; }
+    .act { padding-top: 4.5rem; }
+  }
+</style>

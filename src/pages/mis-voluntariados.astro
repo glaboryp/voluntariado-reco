@@ -1,0 +1,63 @@
+---
+import ActivityCard from '../components/ActivityCard.astro';
+import ConfirmDialog from '../components/ConfirmDialog.astro';
+import Base from '../layouts/Base.astro';
+import { activityStatus } from '../lib/rules';
+import { confirmationSentFor, listUserActivities, removeSignup } from '../lib/signups';
+
+const user = Astro.locals.user!;
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData().catch(() => new FormData());
+  const removed = await removeSignup(Number(fd.get('cancel')), user.id);
+  return Astro.redirect(removed ? '/mis-voluntariados?baja=1' : '/mis-voluntariados');
+}
+const now = new Date();
+const mine = await listUserActivities(user.id);
+const okId = Number(Astro.url.searchParams.get('ok'));
+const okActivity = mine.find((a) => a.id === okId);
+const emailSent = okActivity ? await confirmationSentFor(okActivity.id, user.id) : false;
+---
+<Base title="Mis voluntariados · Recoletos">
+  <div class="wrap page">
+    <header class="head">
+      <h1>Mis voluntariados</h1>
+      <a href="/mis-datos" class="btn btn--quiet">Mis datos</a>
+    </header>
+    {okActivity && <p class="notice" role="status">Te has apuntado a {okActivity.title}. {emailSent ? 'Te hemos enviado un email con los detalles.' : 'Aquí tienes siempre tus voluntariados.'}</p>}
+    {Astro.url.searchParams.has('baja') && <p class="notice" role="status">Hecho, hemos liberado tu plaza. ¡Gracias por avisar!</p>}
+    {mine.length === 0 ? (
+      <div class="empty">
+        <p>Aún no te has apuntado a ningún voluntariado.</p>
+        <a class="btn" href="/#voluntariados">Ver voluntariados</a>
+      </div>
+    ) : (
+      mine.map((a) => (
+        <div class="item">
+          <ActivityCard activity={a} status={activityStatus(a, now)} action="none" />
+          {now < a.startsAt && (
+            <>
+              <button class="btn btn--quiet cancel" data-dialog={`cancel-${a.id}`}>Ya no puedo ir</button>
+              <ConfirmDialog id={`cancel-${a.id}`} title="¿Liberar tu plaza?">
+                <p>Dejarás de estar apuntado/a a {a.title} y otra persona podrá ocupar tu plaza.</p>
+                <Fragment slot="actions">
+                  <form method="post"><input type="hidden" name="cancel" value={a.id} /><button class="btn btn--danger">Sí, ya no puedo ir</button></form>
+                  <button class="btn btn--quiet" data-close>Mantener mi plaza</button>
+                </Fragment>
+              </ConfirmDialog>
+            </>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+</Base>
+<style>
+  .page { padding-block: clamp(1.5rem, 4vw, 4rem); display: grid; gap: 1.5rem; }
+  .head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+  h1 { font-size: var(--step-head); }
+  .empty { display: grid; gap: 1.25rem; justify-items: start; font-size: var(--step-lead); padding-block: 2rem; }
+  .item { padding-bottom: 1.5rem; }
+  .item + .item { padding-top: 0.5rem; }
+  .cancel { margin-left: calc(4rem + 1rem); }
+  @media (min-width: 1000px) { .cancel { margin-left: calc(9rem + 3rem); } }
+</style>

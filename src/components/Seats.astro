@@ -1,0 +1,27 @@
+---
+const { capacity, taken } = Astro.props as { capacity: number; taken: number };
+const free = Math.max(capacity - taken, 0);
+const label = `${taken} de ${capacity} plazas ocupadas`;
+---
+{capacity <= 40 ? (
+  <div class="seats" role="img" aria-label={label}>
+    {Array.from({ length: capacity }, (_, i) => (
+      <svg viewBox="0 0 16 16" width="16" height="16" class={i < taken ? 'taken' : ''} aria-hidden="true">
+        <path d="M2 8.2 8 2.4l6 5.8V14H2z" />
+      </svg>
+    ))}
+  </div>
+) : (
+  <div class="bar" role="img" aria-label={label}><span style={`width:${(taken / capacity) * 100}%`}></span></div>
+)}
+<p class="count">
+  {free === 0 ? 'No quedan plazas' : free === 1 ? `Queda 1 plaza de ${capacity}` : `Quedan ${free} de ${capacity} plazas`}
+</p>
+<style>
+  .seats { display: flex; flex-wrap: wrap; gap: 4px; }
+  .seats path { fill: none; stroke: var(--seat-free); stroke-width: 1.8; stroke-linejoin: round; }
+  .seats .taken path { fill: var(--teal); stroke: var(--teal); }
+  .bar { height: 10px; background: var(--seat-free); }
+  .bar span { display: block; height: 100%; background: var(--teal); }
+  .count { margin-top: 0.45rem; font-weight: 500; }
+</style>
