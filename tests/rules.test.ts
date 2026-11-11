@@ -68,8 +68,14 @@ describe('parseActivityForm', () => {
 describe('parseProfileForm', () => {
   const ok = { fullName: ' Ana Núñez ', phone: '612 345 678', isAdult: 'si', consent: 'on' };
   test('datos válidos', () => {
-    expect(parseProfileForm(form(ok), true)).toEqual({ ok: true, data: { fullName: 'Ana Núñez', phone: '612345678', isAdult: true } });
+    expect(parseProfileForm(form(ok), true)).toEqual({ ok: true, data: { fullName: 'Ana Núñez', phone: '612345678', isAdult: true, referredBy: null } });
     expect(parseProfileForm(form({ ...ok, isAdult: 'no' }), true)).toMatchObject({ ok: true, data: { isAdult: false } });
+  });
+  test('quién te ha invitado es opcional y se recorta', () => {
+    expect(parseProfileForm(form({ ...ok, referredBy: '  Marta López ' }), true)).toMatchObject({ ok: true, data: { referredBy: 'Marta López' } });
+    expect(parseProfileForm(form({ ...ok, referredBy: '   ' }), true)).toMatchObject({ ok: true, data: { referredBy: null } });
+    const long = parseProfileForm(form({ ...ok, referredBy: 'x'.repeat(121) }), true);
+    expect(long.ok === false && long.errors.referredBy).toBeTruthy();
   });
   test('sin consentimiento ⇒ error solo si se exige', () => {
     const { consent, ...noConsent } = ok;

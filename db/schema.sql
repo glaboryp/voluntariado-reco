@@ -46,3 +46,5 @@ CREATE TABLE IF NOT EXISTS signups (
   confirmation_sent boolean NOT NULL DEFAULT false,
   PRIMARY KEY (activity_id, user_id)
 );
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referred_by text;

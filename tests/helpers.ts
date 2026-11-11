@@ -5,7 +5,7 @@ import type { ActivityInput } from '../src/lib/rules';
 
 export async function mkUser(n: number, withProfile = true): Promise<string> {
   const id = await upsertUserFromGoogle(`sub-${n}`, `user${n}@x.es`);
-  if (withProfile) await upsertProfile(id, { fullName: `Persona ${n}`, phone: `61200000${n}`, isAdult: true });
+  if (withProfile) await upsertProfile(id, { fullName: `Persona ${n}`, phone: `61200000${n}`, isAdult: true, referredBy: n === 2 ? 'Marta' : null });
   return id;
 }
 

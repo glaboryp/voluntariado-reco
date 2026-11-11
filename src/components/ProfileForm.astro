@@ -1,7 +1,7 @@
 ---
 import { CONSENT_TEXT } from '../lib/signup-flow';
 
-type Values = { fullName?: string; phone?: string; isAdult?: boolean | null };
+type Values = { fullName?: string; phone?: string; isAdult?: boolean | null; referredBy?: string | null };
 const { values = {}, errors = {}, email, requireConsent, submitLabel } = Astro.props as {
   values?: Values;
   errors?: Record<string, string>;
@@ -34,6 +34,11 @@ const err = (k: string) => (errors[k] ? { 'aria-invalid': 'true', 'aria-describe
     </div>
     {errors.isAdult && <p class="error" id="isAdult-error">{errors.isAdult}</p>}
   </fieldset>
+  <div class="field">
+    <label for="referredBy">¿Quién te ha invitado?</label>
+    <input id="referredBy" name="referredBy" maxlength="120" value={values.referredBy ?? ''} {...err('referredBy')} />
+    {errors.referredBy ? <p class="error" id="referredBy-error">{errors.referredBy}</p> : <p class="hint">Opcional. Si ya vienes a Recoletos, déjalo vacío.</p>}
+  </div>
   {requireConsent && (
     <div class="field">
       <label class="choice"><input type="checkbox" name="consent" {...err('consent')} /> <span>{CONSENT_TEXT}</span></label>
