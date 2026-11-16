@@ -26,7 +26,7 @@ if (Astro.request.method === 'POST') {
   const notify = fd.get('notify') === 'yes' ? 'yes' : fd.get('notify') === 'no' ? 'no' : 'ask';
 
   if (intent === 'save') {
-    values = Object.fromEntries(['title', 'description', 'location', 'startsAt', 'endsAt', 'signupClosesAt', 'capacity'].map((k) => [k, String(fd.get(k) ?? '')]));
+    values = Object.fromEntries(['title', 'description', 'location', 'mapsUrl', 'startsAt', 'endsAt', 'signupClosesAt', 'capacity'].map((k) => [k, String(fd.get(k) ?? '')]));
     const parsed = parseActivityForm(fd);
     if (!parsed.ok) errors = parsed.errors;
     else {

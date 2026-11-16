@@ -49,3 +49,4 @@ CREATE TABLE IF NOT EXISTS signups (
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referred_by text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS has_car boolean;
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS maps_url text;

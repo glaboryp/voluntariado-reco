@@ -9,6 +9,7 @@ const inv = (k: string) => (errors[k] ? { 'aria-invalid': 'true', 'aria-describe
 const fields = [
   { k: 'title', label: 'Título', type: 'text', req: true },
   { k: 'location', label: 'Lugar', type: 'text', req: true },
+  { k: 'mapsUrl', label: 'Enlace de Google Maps (opcional)', type: 'url', req: false, hint: 'Si lo pones, el lugar se verá como enlace al mapa.' },
   { k: 'startsAt', label: 'Inicio', type: 'datetime-local', req: true },
   { k: 'endsAt', label: 'Fin (opcional)', type: 'datetime-local', req: false },
   { k: 'signupClosesAt', label: 'Cierre de inscripción (opcional)', type: 'datetime-local', req: false, hint: 'Si lo dejas vacío, la inscripción se cierra al empezar.' },
@@ -38,7 +39,7 @@ const fields = [
   .grid { display: grid; gap: 1.25rem; width: 100%; }
   @media (min-width: 760px) {
     .grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .f-title, .f-location, .f-description { grid-column: span 6; }
+    .f-title, .f-location, .f-mapsUrl, .f-description { grid-column: span 6; }
     .f-startsAt, .f-endsAt, .f-signupClosesAt { grid-column: span 2; }
     .f-capacity { grid-column: span 2; }
   }

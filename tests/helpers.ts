@@ -11,7 +11,7 @@ export async function mkUser(n: number, withProfile = true): Promise<string> {
 
 export function activityInput(over: Partial<ActivityInput> = {}): ActivityInput {
   return {
-    title: 'Banco de Alimentos', description: 'Recogida', location: 'Mercadona Goya',
+    title: 'Banco de Alimentos', description: 'Recogida', location: 'Mercadona Goya', mapsUrl: null,
     startsAt: new Date('2027-12-13T09:00Z'), endsAt: null, signupClosesAt: new Date('2027-12-12T20:00Z'),
     capacity: 2, ...over,
   };

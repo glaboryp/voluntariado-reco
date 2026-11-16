@@ -63,6 +63,16 @@ describe('parseActivityForm', () => {
     if (r.ok) return;
     expect(Object.keys(r.errors)).toEqual(expect.arrayContaining(['title', 'location', 'startsAt']));
   });
+  test('enlace de Maps: vacío ⇒ null; https se guarda recortado', () => {
+    const none = parseActivityForm(form(activityFields));
+    expect(none.ok && none.data.mapsUrl).toBeNull();
+    const r = parseActivityForm(form({ ...activityFields, mapsUrl: ' https://maps.app.goo.gl/abc123 ' }));
+    expect(r.ok && r.data.mapsUrl).toBe('https://maps.app.goo.gl/abc123');
+  });
+  test.each(['javascript:alert(1)', 'Mercadona Goya', 'ftp://x.es'])('enlace de Maps %s ⇒ error', (mapsUrl) => {
+    const r = parseActivityForm(form({ ...activityFields, mapsUrl }));
+    expect(r.ok === false && r.errors.mapsUrl).toBeTruthy();
+  });
 });
 
 describe('parseProfileForm', () => {
@@ -104,7 +114,7 @@ describe('activityStatus', () => {
 
 describe('needsChangePrompt', () => {
   const before: ActivityInput = {
-    title: 'A', description: 'd', location: 'L', capacity: 5,
+    title: 'A', description: 'd', location: 'L', mapsUrl: null, capacity: 5,
     startsAt: new Date('2026-12-13T09:00Z'), endsAt: null, signupClosesAt: new Date('2026-12-13T09:00Z'),
   };
   test('sin apuntados nunca pregunta', () => {
@@ -126,7 +136,7 @@ describe('needsChangePrompt', () => {
 
 describe('activityFormValues', () => {
   const a = {
-    id: 1, title: 'T', description: 'd', location: 'L', capacity: 5, hidden: false, taken: 0,
+    id: 1, title: 'T', description: 'd', location: 'L', mapsUrl: null, capacity: 5, hidden: false, taken: 0,
     startsAt: new Date('2026-12-13T09:00Z'), endsAt: null, signupClosesAt: new Date('2026-12-13T09:00Z'),
   };
   test('cierre igual al inicio ⇒ campo vacío, para que siga al inicio al editar', () => {
