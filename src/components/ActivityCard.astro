@@ -17,7 +17,7 @@ const blocked = { full: 'Completo', closed: 'Inscripción cerrada', finished: 'F
   <div class="body">
     <h3 id={`a-${a.id}`}>{a.title}</h3>
     <p class="meta"><span class="visually-hidden">Cuándo: </span>{formatRange(a.startsAt, a.endsAt)}</p>
-    <p class="meta"><span class="visually-hidden">Dónde: </span>{a.mapsUrl ? <a href={a.mapsUrl}>{a.location}</a> : a.location}</p>
+    <p class="meta"><span class="visually-hidden">Dónde: </span>{a.mapsUrl ? <a href={a.mapsUrl} target="_blank" rel="noopener noreferrer">{a.location}<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a> : a.location}</p>
     {a.description && <p class="desc">{a.description}</p>}
   </div>
   <div class="side">
