@@ -5,6 +5,7 @@ export type Activity = {
   title: string;
   description: string;
   location: string;
+  mapsUrl: string | null;
   startsAt: Date;
   endsAt: Date | null;
   signupClosesAt: Date;
@@ -33,6 +34,10 @@ export function parseActivityForm(fd: FormData): Parsed<ActivityInput> {
   const location = text(fd, 'location');
   if (!title) errors.title = 'Pon un título.';
   if (!location) errors.location = 'Indica el lugar.';
+  const mapsUrl = text(fd, 'mapsUrl') || null;
+  if (mapsUrl && (!/^https?:\/\//i.test(mapsUrl) || !URL.canParse(mapsUrl) || mapsUrl.length > 500)) {
+    errors.mapsUrl = 'Pega el enlace completo, empezando por https://';
+  }
 
   const startsAt = madridLocalToDate(text(fd, 'startsAt'));
   if (!valid(startsAt)) errors.startsAt = 'Indica la fecha y hora de inicio.';
@@ -54,7 +59,7 @@ export function parseActivityForm(fd: FormData): Parsed<ActivityInput> {
   if (!/^\d+$/.test(capRaw) || capacity < 1) errors.capacity = 'El cupo tiene que ser un número entero mayor que 0.';
 
   if (Object.keys(errors).length) return { ok: false, errors };
-  return { ok: true, data: { title, description, location, startsAt, endsAt, signupClosesAt, capacity } };
+  return { ok: true, data: { title, description, location, mapsUrl, startsAt, endsAt, signupClosesAt, capacity } };
 }
 
 export function parseProfileForm(fd: FormData, requireConsent: boolean): Parsed<ProfileInput> {
@@ -103,7 +108,7 @@ export function needsChangePrompt(before: ActivityInput, after: ActivityInput, s
 export function activityFormValues(a: Activity): Record<string, string> {
   const closesAtStart = a.signupClosesAt.getTime() === a.startsAt.getTime();
   return {
-    title: a.title, description: a.description, location: a.location, capacity: String(a.capacity),
+    title: a.title, description: a.description, location: a.location, mapsUrl: a.mapsUrl ?? '', capacity: String(a.capacity),
     startsAt: dateToMadridLocal(a.startsAt),
     endsAt: a.endsAt ? dateToMadridLocal(a.endsAt) : '',
     // left empty so a postponed start moves the close with it

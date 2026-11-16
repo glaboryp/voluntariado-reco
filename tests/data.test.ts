@@ -76,9 +76,9 @@ describe('voluntariados', () => {
 
   test('updateActivity guarda y devuelve el estado anterior', async () => {
     const a = await mkActivity();
-    const r = await updateActivity(a, activityInput({ location: 'Otro sitio', capacity: 5 }));
+    const r = await updateActivity(a, activityInput({ location: 'Otro sitio', mapsUrl: 'https://maps.app.goo.gl/x', capacity: 5 }));
     expect(r.ok && r.before.location).toBe('Mercadona Goya');
-    expect(await getActivity(a)).toMatchObject({ location: 'Otro sitio', capacity: 5, taken: 0, hidden: false });
+    expect(await getActivity(a)).toMatchObject({ location: 'Otro sitio', mapsUrl: 'https://maps.app.goo.gl/x', capacity: 5, taken: 0, hidden: false });
   });
 
   test('borrar voluntariado devuelve a sus apuntados y los borra en cascada', async () => {

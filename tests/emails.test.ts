@@ -5,7 +5,7 @@ import type { Activity } from '../src/lib/rules';
 import { formatRange } from '../src/lib/time';
 
 const activity: Activity = {
-  id: 7, title: 'Banco de Alimentos', description: 'Recogida', location: 'Mercadona Goya',
+  id: 7, title: 'Banco de Alimentos', description: 'Recogida', location: 'Mercadona Goya', mapsUrl: null,
   startsAt: new Date('2026-12-13T09:00Z'), endsAt: new Date('2026-12-13T13:00Z'),
   signupClosesAt: new Date('2026-12-13T09:00Z'), capacity: 10, hidden: false, taken: 3,
 };

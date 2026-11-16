@@ -1,12 +1,12 @@
 import { q, tx } from './db';
 import type { Activity, ActivityInput } from './rules';
 
-export const ACTIVITY_COLS = `a.id, a.title, a.description, a.location,
+export const ACTIVITY_COLS = `a.id, a.title, a.description, a.location, a.maps_url AS "mapsUrl",
   a.starts_at AS "startsAt", a.ends_at AS "endsAt", a.signup_closes_at AS "signupClosesAt",
   a.capacity, a.hidden, (SELECT count(*) FROM signups s WHERE s.activity_id = a.id)::int AS taken`;
 
 const inputParams = (i: ActivityInput) =>
-  [i.title, i.description, i.location, i.startsAt, i.endsAt, i.signupClosesAt, i.capacity];
+  [i.title, i.description, i.location, i.startsAt, i.endsAt, i.signupClosesAt, i.capacity, i.mapsUrl];
 
 export function listPublicActivities(now = new Date()): Promise<Activity[]> {
   return q<Activity>(
@@ -26,8 +26,8 @@ export async function getActivity(id: number): Promise<Activity | null> {
 
 export async function createActivity(input: ActivityInput): Promise<number> {
   const [{ id }] = await q<{ id: number }>(
-    `INSERT INTO activities (title, description, location, starts_at, ends_at, signup_closes_at, capacity)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+    `INSERT INTO activities (title, description, location, starts_at, ends_at, signup_closes_at, capacity, maps_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
     inputParams(input),
   );
   return id;
@@ -44,7 +44,7 @@ export function updateActivity(
     if (input.capacity < before.taken) return { ok: false, reason: 'capacity_below_taken' } as const;
     await c.query(
       `UPDATE activities SET title = $1, description = $2, location = $3, starts_at = $4, ends_at = $5,
-         signup_closes_at = $6, capacity = $7 WHERE id = $8`,
+         signup_closes_at = $6, capacity = $7, maps_url = $8 WHERE id = $9`,
       [...inputParams(input), id],
     );
     return { ok: true, before } as const;
