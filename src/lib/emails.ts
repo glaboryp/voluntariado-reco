@@ -27,6 +27,13 @@ const COPY = {
     outro: 'Puedes echar un vistazo a los demás voluntariados de la campaña.',
     button: 'Ver voluntariados',
   },
+  reminder: {
+    subject: (t: string) => `Mañana: ${t}`,
+    title: '¡Nos vemos mañana!',
+    intro: (name: string) => `Hola ${name}, te recordamos que mañana tienes este voluntariado de Navidad. ¡Gracias por apuntarte!`,
+    outro: 'Si al final no puedes venir, libera tu plaza desde la web para que otra persona pueda ocuparla.',
+    button: 'Ver mis voluntariados',
+  },
   removed: {
     subject: (t: string) => `Ya no estás apuntada a ${t}`,
     title: 'Te hemos dado de baja de este voluntariado',
@@ -85,6 +92,9 @@ export const confirmationEmail = (a: Activity, p: Person): Mail =>
 
 export const cancellationEmail = (a: Activity, p: Person): Mail =>
   render(p.email, COPY.cancellation, a, p.fullName, detailRows(a), '/');
+
+export const reminderEmail = (a: Activity, p: Person): Mail =>
+  render(p.email, COPY.reminder, a, p.fullName, [...detailRows(a), ...(a.mapsUrl ? [{ label: 'Mapa', value: a.mapsUrl }] : [])], '/mis-voluntariados');
 
 export const removedEmail = (a: Activity, p: Person): Mail =>
   render(p.email, COPY.removed, a, p.fullName, detailRows(a), '/');

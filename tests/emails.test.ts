@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { cancellationEmail, changeEmail, confirmationEmail, removedEmail } from '../src/lib/emails';
+import { cancellationEmail, changeEmail, confirmationEmail, reminderEmail, removedEmail } from '../src/lib/emails';
 import { sendMany, type Mail } from '../src/lib/mail';
 import type { Activity } from '../src/lib/rules';
 import { formatRange } from '../src/lib/time';
@@ -16,6 +16,7 @@ describe('plantillas', () => {
     ['confirmación', confirmationEmail(activity, person)],
     ['cancelación', cancellationEmail(activity, person)],
     ['baja', removedEmail(activity, person)],
+    ['recordatorio', reminderEmail(activity, person)],
     ['cambio', changeEmail(activity, { ...activity, location: 'Carrefour Serrano' }, person)],
   ])('%s lleva título, fecha y lugar en html y texto', (_, m) => {
     expect(m.to).toBe('ana@x.es');
@@ -28,6 +29,14 @@ describe('plantillas', () => {
   test('confirmación enlaza a mis voluntariados; baja enlaza a la portada', () => {
     expect(confirmationEmail(activity, person).html).toContain('https://voluntariado.test/mis-voluntariados');
     expect(removedEmail(activity, person).text).toContain('https://voluntariado.test/');
+  });
+
+  test('recordatorio: asunto con Mañana y enlace al mapa solo si lo hay', () => {
+    expect(reminderEmail(activity, person).subject).toBe('Mañana: Banco de Alimentos');
+    expect(reminderEmail(activity, person).text).not.toContain('Mapa');
+    const m = reminderEmail({ ...activity, mapsUrl: 'https://maps.app.goo.gl/x' }, person);
+    expect(m.text).toContain('Mapa: https://maps.app.goo.gl/x');
+    expect(m.html).toContain('https://maps.app.goo.gl/x');
   });
 
   test('cambio de lugar muestra antes y ahora', () => {

@@ -28,6 +28,7 @@ pnpm test             # usa su propia base de datos (reco_test)
 | `GMAIL_USER` | `recoletosuniversitario@gmail.com` |
 | `GMAIL_APP_PASSWORD` | Contraseña de aplicación de esa cuenta (ver abajo). |
 | `INITIAL_ADMIN_EMAIL` | Email de Google del primer admin. `pnpm db:migrate` lo da de alta. |
+| `CRON_SECRET` | Clave aleatoria. Vercel la manda al llamar a `/api/recordatorios` cada día a las 17:00 UTC (18:00 en Madrid en invierno), que envía el recordatorio a quien tiene voluntariado al día siguiente. |
 
 ## Pasos manuales
 
