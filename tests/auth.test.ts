@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { createSession, guard, invalidateSession, safeNext, validateSession, type SessionUser } from '../src/lib/auth';
+import { createSession, guard, invalidateSession, landingAfterLogin, safeNext, validateSession, type SessionUser } from '../src/lib/auth';
 import { addAdmin } from '../src/lib/admins';
 import { q } from '../src/lib/db';
 import { purgeVolunteerData } from '../src/lib/purge';
@@ -79,4 +79,10 @@ test('safeNext solo acepta rutas internas', () => {
   expect(safeNext('/\t/evil.com')).toBe('/');
   expect(safeNext('/%09/evil.com')).toBe('/%09/evil.com');
   expect(safeNext('/mis-voluntariados?ok=3')).toBe('/mis-voluntariados?ok=3');
+});
+
+test('al entrar desde la cabecera, las admins van al panel; el resto de destinos se respeta', () => {
+  expect(landingAfterLogin('/mis-voluntariados', true)).toBe('/admin');
+  expect(landingAfterLogin('/mis-voluntariados', false)).toBe('/mis-voluntariados');
+  expect(landingAfterLogin('/apuntarme/3', true)).toBe('/apuntarme/3');
 });
