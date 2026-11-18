@@ -47,6 +47,9 @@ export function guard(pathname: string, user: SessionUser | null): 'allow' | 'lo
   return 'allow';
 }
 
+export const landingAfterLogin = (next: string, admin: boolean) =>
+  admin && next === '/mis-voluntariados' ? '/admin' : next;
+
 export function safeNext(next: string | null | undefined): string {
   if (!next?.startsWith('/')) return '/';
   // URL parsing strips tabs/newlines and treats backslashes like browsers do, so '/\t/evil.com' resolves off-site

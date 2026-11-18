@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { createSession, exchangeGoogleCode, safeNext, SESSION_COOKIE } from '../../../lib/auth';
+import { isAdmin } from '../../../lib/admins';
+import { createSession, exchangeGoogleCode, landingAfterLogin, safeNext, SESSION_COOKIE } from '../../../lib/auth';
 import { upsertUserFromGoogle } from '../../../lib/users';
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
@@ -20,5 +21,5 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   cookies.set(SESSION_COOKIE, token, {
     path: '/', httpOnly: true, secure: import.meta.env.PROD, sameSite: 'lax', expires: expiresAt,
   });
-  return redirect(next);
+  return redirect(landingAfterLogin(next, await isAdmin(google.email)));
 };
