@@ -15,8 +15,16 @@ const [activities, mine] = await Promise.all([
 ]);
 const joined = new Set(mine.map((a) => a.id));
 const action = user?.hasProfile ? 'post' : 'link';
+const login = Astro.url.searchParams.get('login');
 ---
 <Base title="Voluntariados de Navidad · Recoletos">
+  {login && (
+    <div class="wrap login-msg">
+      <p class="notice notice--error" role="status">
+        {login === 'cancelado' ? 'No has iniciado sesión. Puedes volver a intentarlo cuando quieras.' : 'El inicio de sesión ha caducado. Vuelve a intentarlo.'}
+      </p>
+    </div>
+  )}
   <Hero />
   <section id="voluntariados" class="wrap list" aria-labelledby="list-title">
     <h2 id="list-title">Voluntariados</h2>
@@ -33,5 +41,6 @@ const action = user?.hasProfile ? 'post' : 'link';
 <style>
   .list { padding-top: clamp(1rem, 3vw, 3rem); scroll-margin-top: 1rem; }
   .list > h2 { font-size: var(--step-head); margin-bottom: 0.5rem; }
+  .login-msg { padding-top: 1rem; }
   .empty { font-size: var(--step-lead); max-width: 34ch; padding-block: 2rem; }
 </style>

@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 
   const code = url.searchParams.get('code');
   if (!code || !state || !verifier || url.searchParams.get('state') !== state) {
-    return new Response('El inicio de sesión ha caducado. Vuelve a intentarlo.', { status: 400 });
+    return redirect(`/?login=${url.searchParams.has('error') ? 'cancelado' : 'caducado'}`);
   }
   const google = await exchangeGoogleCode(code, verifier);
   if (!google.emailVerified) return new Response('Tu cuenta de Google no tiene el email verificado.', { status: 400 });
