@@ -7,6 +7,7 @@ import { getProfile, upsertProfile } from '../../lib/profiles';
 import { activityStatus, parseProfileForm } from '../../lib/rules';
 import { completeSignup, SIGNUP_MESSAGES } from '../../lib/signup-flow';
 import { listUserActivities } from '../../lib/signups';
+import { formatRange } from '../../lib/time';
 
 const user = Astro.locals.user!;
 const id = Number(Astro.params.id);
@@ -51,10 +52,10 @@ const status = available ? activityStatus(activity!, new Date()) : null;
       </section>
     ) : (
       <>
-        <section class="summary" aria-labelledby="page-title">
-          <h1 id="page-title">{profile ? 'Confirma tu plaza' : 'Tus datos y listo'}</h1>
-          <ActivityCard activity={activity!} status={status!} action="none" />
-        </section>
+        <header class="head">
+          <h1>{profile ? 'Confirma tu plaza' : 'Tus datos y listo'}</h1>
+          <p class="for">Para <strong>{activity!.title}</strong>, {formatRange(activity!.startsAt, activity!.endsAt)}. Abajo tienes todos los detalles.</p>
+        </header>
         <section class="act" aria-label="Inscripción">
           {message && <p class="notice notice--error" role="alert">{message}</p>}
           {alreadyJoined ? (
@@ -73,6 +74,9 @@ const status = available ? activityStatus(activity!, new Date()) : null;
             </>
           )}
         </section>
+        <section class="summary" aria-label="Detalles del voluntariado">
+          <ActivityCard activity={activity!} status={status!} action="none" />
+        </section>
       </>
     )}
   </div>
@@ -80,15 +84,19 @@ const status = available ? activityStatus(activity!, new Date()) : null;
 <style>
   .page { display: grid; gap: 2.5rem; padding-block: clamp(1.5rem, 4vw, 4rem); }
   h1 { font-size: var(--step-head); }
-  .summary h1 { margin-bottom: 0.5rem; }
+  .head { display: grid; gap: 0.75rem; }
+  .for { font-weight: 500; max-width: 40ch; }
   .act { display: grid; gap: 1.25rem; align-content: start; max-width: 32rem; }
   .confirm { display: grid; gap: 1.25rem; }
   .intro { font-weight: 500; }
   .gone { display: grid; gap: 1.5rem; justify-items: start; padding-block: 3rem; }
   .lead { font-size: var(--step-lead); max-width: 34ch; }
   @media (min-width: 1000px) {
-    .page { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 4rem; }
+    .page { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-areas: 'head .' 'summary act'; gap: 0 4rem; }
+    .head { grid-area: head; }
+    .for { display: none; }
+    .summary { grid-area: summary; }
+    .act { grid-area: act; padding-top: 3rem; }
     .summary :global(.activity) { grid-template-columns: 7rem minmax(0, 1fr); grid-template-areas: 'date body' '. side'; }
-    .act { padding-top: 4.5rem; }
   }
 </style>
