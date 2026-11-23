@@ -18,7 +18,7 @@
     "@astrojs/vercel": "^11.0.22",
     "astro": "^7.4.13",
     "exceljs": "^4.4.0",
-    "nodemailer": "^10.6.0",
+    "nodemailer": "^10.6.1",
     "pg": "^8.23.1"
   },
   "devDependencies": {
